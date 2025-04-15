@@ -1,4 +1,4 @@
-enum NavRoute { splash, onBoarding, chooseCategory }
+enum NavRoute { splash, onBoarding, chooseCategory,quizDetails ,quizScreen, resultScreen,}
 
 extension NavRouteExtension on NavRoute {
   String get path {
@@ -9,6 +9,12 @@ extension NavRouteExtension on NavRoute {
         return "onBoarding";
       case NavRoute.chooseCategory:
         return "/chooseCategory";
+      case NavRoute.quizDetails:
+        return "/quizDetails";
+      case NavRoute.quizScreen:
+        return "/quizScreen";
+      case NavRoute.resultScreen:
+        return "/resultScreen";  
     }
   }
 }

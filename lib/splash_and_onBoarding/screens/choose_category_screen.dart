@@ -1,40 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:queezy/common/common.dart';
+import 'package:queezy/routes/routes.dart';
+
+import '../models/category_model.dart';
 
 class ChooseCategoryScreen extends StatefulWidget {
-  const ChooseCategoryScreen({super.key});
+  const ChooseCategoryScreen({Key? key}) : super(key: key);
 
   @override
   State<ChooseCategoryScreen> createState() => _ChooseCategoryScreenState();
 }
 
-List<Map<String, dynamic>> content = [
-  {"image": "assets/images/math.png", "category": "Math"},
-  {"image": "assets/images/sports.png", "category": "Sports"},
-  {"image": "assets/images/music.png", "category": "Music"},
-  {"image": "assets/images/science.png", "category": "Science"},
-  {"image": "assets/images/art.png", "category": "Art"},
-  {"image": "assets/images/travel.png", "category": "Travel"},
-  {"image": "assets/images/history.png", "category": "History"},
-  {"image": "assets/images/tech.png", "category": "Tech"},
-];
-
 class _ChooseCategoryScreenState extends State<ChooseCategoryScreen> {
+  Map<String, dynamic>? selectedCategory;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xff6A5AE0),
-        title: Center(child: Text("Choose Category")),
+        title: Center(
+          child: Text(
+            "Choose Category",
+            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+          ),
+        ),
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          color: Color(0xff6A5AE0),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Center(
-              child: Column(
-                children: [
-                  Container(
+      body: Container(
+        color: const Color(0xff6A5AE0),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Center(
+            child: Column(
+              children: [
+                Expanded(
+                  child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
@@ -42,39 +43,141 @@ class _ChooseCategoryScreenState extends State<ChooseCategoryScreen> {
                     height: 684,
                     width: 359,
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: GridView.builder(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10,
-                        ),
-                        itemCount: content.length,
-                        itemBuilder: (context, index) {
-                          final item = content[index];
-                          return Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                color: Color(0xffEFEEFC),
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: GridView.builder(
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    crossAxisSpacing: 0,
+                                    mainAxisSpacing: 0,
+                                    childAspectRatio: 1,
+                                  ),
+                              itemCount: content.length,
+                              itemBuilder: (context, index) {
+                                final item = content[index];
+                                bool isSelected = selectedCategory == item;
+
+                                return Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        selectedCategory = item;
+                                        print(
+                                          "Selected Category: $selectedCategory",
+                                        );
+                                      });
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20),
+                                        color:
+                                            isSelected
+                                                ? Theme.of(
+                                                  context,
+                                                ).colorScheme.onTertiary
+                                                : Theme.of(
+                                                  context,
+                                                ).colorScheme.tertiary,
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              color:
+                                                  context.colorScheme.onPrimary,
+                                            ),
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(
+                                                4.0,
+                                              ),
+                                              child: Image.asset(
+                                                item["image"],
+                                                height: 40,
+                                                width: 40,
+                                              ),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Text(
+                                              item["category"],
+                                              textAlign: TextAlign.center,
+                                              maxLines: 2,
+                                              style: Theme.of(
+                                                context,
+                                              ).textTheme.bodyLarge!.copyWith(
+                                                fontWeight: FontWeight.w500,
+                                                color:
+                                                    isSelected
+                                                        ? Theme.of(
+                                                          context,
+                                                        ).colorScheme.onPrimary
+                                                        : Theme.of(
+                                                          context,
+                                                        ).colorScheme.secondary,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.secondary,
+                              fixedSize: Size(
+                                MediaQuery.of(context).size.width,
+                                50,
                               ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset(item["image"]),
-                                  Text(item["category"]),
-                                ],
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
                               ),
                             ),
-                          );
-                        },
+                            onPressed: () {
+                              if (selectedCategory != null) {
+                                Navigator.pushNamed(
+                                  context,
+                                  NavRoute.quizDetails.path,
+                                  arguments: selectedCategory,
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Please select a category!"),
+                                  ),
+                                );
+                              }
+                            },
+                            child: Text(
+                              "Next",
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodyLarge!.copyWith(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
-                ],
-              ),
+                ),
+                const SizedBox(height: 10),
+              ],
             ),
           ),
         ),
