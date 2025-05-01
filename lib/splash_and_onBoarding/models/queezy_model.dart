@@ -4,7 +4,7 @@ class QueezyModel {
   String? category;
   String? question;
   String? correctAnswer;
-  List<String>? incorrectAnswers;
+  List<String>? randomOptions;
 
   QueezyModel({
     this.type,
@@ -12,14 +12,8 @@ class QueezyModel {
     this.category,
     this.question,
     this.correctAnswer,
-    this.incorrectAnswers,
+    this.randomOptions,
   });
-
-  List<String> get randomOptions {
-    final options = <String>[...incorrectAnswers ?? [], correctAnswer!];
-    options.shuffle();
-    return options;
-  } 
 
   QueezyModel.fromJson(Map<String, dynamic> json) {
     type = json['type'];
@@ -27,7 +21,10 @@ class QueezyModel {
     category = json['category'];
     question = json['question'];
     correctAnswer = json['correct_answer'];
-    incorrectAnswers = json['incorrect_answers'].cast<String>();
+    final incorrectOptions = json['incorrect_answers'].cast<String>() ?? [];
+    final options = <String>[...incorrectOptions, correctAnswer!];
+    options.shuffle();
+    randomOptions = options;
   }
 
   Map<String, dynamic> toJson() {
@@ -37,7 +34,6 @@ class QueezyModel {
     data['category'] = this.category;
     data['question'] = this.question;
     data['correct_answer'] = this.correctAnswer;
-    data['incorrect_answers'] = this.incorrectAnswers;
     return data;
   }
 }

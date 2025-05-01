@@ -32,7 +32,6 @@ class _MyAppState extends State<MyApp> {
           theme: AppTheme().lightTheme,
           themeMode: state,
           routes: router.routes,
-          onGenerateRoute: router.onGenerateRoute,
           navigatorKey: rootNavigator,
         );
       },

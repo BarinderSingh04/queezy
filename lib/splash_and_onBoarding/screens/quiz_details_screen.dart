@@ -1,293 +1,221 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:queezy/common/common.dart';
-import 'package:queezy/splash_and_onBoarding/cubit/queezy_list_cubit.dart';
 import 'package:queezy/routes/routes.dart';
+import 'package:queezy/splash_and_onBoarding/cubit/create_quiz_cubit.dart';
+import 'package:queezy/splash_and_onBoarding/models/create_quiz.dart';
 
 class QuizDetailsScreen extends StatefulWidget {
-  const QuizDetailsScreen({super.key, this.selectedCategory});
-  final Map<String, dynamic>? selectedCategory;
+  const QuizDetailsScreen({super.key});
 
   @override
   State<QuizDetailsScreen> createState() => _QuizDetailsScreenState();
 }
 
 class _QuizDetailsScreenState extends State<QuizDetailsScreen> {
-  String? selectedDifficulity;
+  Map<String, dynamic> difficulty = {"easy": "Easy", "medium": "Medium", "hard": "Hard"};
+  Map<String, dynamic> types = {"boolean": "True / False", "multiple": "Multiple Choice"};
 
   @override
   Widget build(BuildContext context) {
-    print(widget.selectedCategory);
     return Scaffold(
       appBar: AppBar(),
-      body: Column(
-        children: [
-          SizedBox(
-            width: MediaQuery.sizeOf(context).width,
-            child: Image.asset(
-              "assets/images/Illustration.png",
-              fit: BoxFit.contain,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Container(
-              width: MediaQuery.sizeOf(context).width,
-              decoration: BoxDecoration(
-                color: context.colorScheme.onPrimary,
-                borderRadius: BorderRadius.circular(20),
+      body: BlocBuilder<CreateQuizCubit, CreateQuiz>(
+        builder: (context, state) {
+          return Column(
+            children: [
+              Expanded(
+                flex: 1,
+                child: Image.asset("assets/images/Illustration.png", fit: BoxFit.contain),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 20,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.selectedCategory?['category'] ?? '',
-                      style: context.textTheme.bodyMedium!.copyWith(
-                        color: context.colorScheme.onSecondary,
-                        fontFamily: FontFamily.w500,
-                      ),
+              Expanded(
+                flex: 3,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: context.colorScheme.onPrimary,
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Basic Trivia Quiz",
-                      style: context.textTheme.headlineMedium!.copyWith(
-                        fontFamily: FontFamily.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: context.colorScheme.tertiary,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                color: context.colorScheme.secondary,
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(6.0),
-                                child: Icon(
-                                  Icons.question_mark,
-                                  color: context.colorScheme.onPrimary,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              "10 questions",
-                              style: context.textTheme.bodyMedium!.copyWith(
-                                fontFamily: FontFamily.w500,
-                              ),
-                            ),
-                            const SizedBox(width: 20),
-                            Container(
-                              height: 40,
-                              width: 2,
-                              color: Colors.grey.shade300,
-                            ),
-                            const SizedBox(width: 20),
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                color: context.colorScheme.onTertiary,
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(6.0),
-                                child: Icon(
-                                  Icons.extension_outlined,
-                                  color: context.colorScheme.onPrimary,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              "10 questions",
-                              style: context.textTheme.bodyMedium!.copyWith(
-                                fontFamily: FontFamily.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      "Description",
-                      style: context.textTheme.bodyMedium!.copyWith(
-                        color: context.colorScheme.onSecondary,
-                        fontFamily: FontFamily.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      "Any time is a good time for a quiz and even better if that happens to be a football themed quiz!",
-                      style: context.textTheme.bodyLarge!.copyWith(
-                        fontFamily: FontFamily.w400,
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                selectedDifficulity == 'easy'
-                                    ? context.colorScheme.secondary
-                                    : context.colorScheme.tertiary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              selectedDifficulity = "easy";
-                            });
-                          },
-                          child: Text(
-                            "Easy",
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            state.categoryName ?? "",
                             style: context.textTheme.bodyMedium!.copyWith(
-                              color:
-                                  selectedDifficulity == 'easy'
-                                      ? context.colorScheme.onPrimary
-                                      : context.colorScheme.primary,
+                              color: context.colorScheme.onSecondary,
+                              fontFamily: FontFamily.w500,
                             ),
                           ),
-                        ),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                selectedDifficulity == 'medium'
-                                    ? context.colorScheme.secondary
-                                    : context.colorScheme.tertiary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                          const SizedBox(height: 4),
+                          Text(
+                            "Basic Trivia Quiz",
+                            style: context.textTheme.headlineMedium!.copyWith(
+                              fontFamily: FontFamily.w500,
                             ),
                           ),
-                          onPressed: () {
-                            setState(() {
-                              selectedDifficulity = "medium";
-                            });
-                          },
-                          child: Text(
-                            "Medium",
-                            style: context.textTheme.bodyMedium!.copyWith(
-                              color:
-                                  selectedDifficulity == 'medium'
-                                      ? context.colorScheme.onPrimary
-                                      : context.colorScheme.primary,
+                          const SizedBox(height: 16),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: context.colorScheme.tertiary,
+                              borderRadius: BorderRadius.circular(20),
                             ),
-                          ),
-                        ),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                selectedDifficulity == 'hard'
-                                    ? context.colorScheme.secondary
-                                    : context.colorScheme.tertiary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              selectedDifficulity = "hard";
-                            });
-                          },
-                          child: Text(
-                            "Hard",
-                            style: context.textTheme.bodyMedium!.copyWith(
-                              color:
-                                  selectedDifficulity == 'hard'
-                                      ? context.colorScheme.onPrimary
-                                      : context.colorScheme.primary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Builder(
-                          builder: (context) {
-                            return Expanded(
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  fixedSize: Size(140, 50),
-                                  backgroundColor:
-                                      context.colorScheme.onPrimary,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                    side: BorderSide(
-                                      color: context.colorScheme.onSecondary,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      color: context.colorScheme.secondary,
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(6.0),
+                                      child: Icon(
+                                        Icons.question_mark,
+                                        color: context.colorScheme.onPrimary,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                onPressed: () {
-                                  context.read<QueezyListCubit>().getquestion(
-                                    difficulity: selectedDifficulity ?? 'easy',
-                                    category:
-                                        widget.selectedCategory?["id"]
-                                            .toString(),
-                                  );
-                                  Navigator.pushNamed(
-                                    context,
-                                    NavRoute.quizScreen.path,
-                                    arguments: selectedDifficulity,
-                                  );
-                                },
-                                child: Text(
-                                  "Play Solo",
-                                  style: context.textTheme.bodyMedium!.copyWith(
-                                    color: context.colorScheme.secondary,
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    "10 questions",
+                                    style: context.textTheme.bodyMedium!.copyWith(
+                                      fontFamily: FontFamily.w500,
+                                    ),
                                   ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              fixedSize: Size(140, 50),
-                              backgroundColor: context.colorScheme.secondary,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                                side: BorderSide(
-                                  color: context.colorScheme.onSecondary,
-                                ),
-                              ),
-                            ),
-                            onPressed: () {},
-                            child: Text(
-                              "Play with Friends",
-                              style: context.textTheme.bodyMedium!.copyWith(
-                                color: context.colorScheme.onPrimary,
+                                  const SizedBox(width: 20),
+                                  Container(height: 40, width: 2, color: Colors.grey.shade300),
+                                  const SizedBox(width: 20),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      color: context.colorScheme.onTertiary,
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(6.0),
+                                      child: Icon(
+                                        Icons.extension_outlined,
+                                        color: context.colorScheme.onPrimary,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    "100 points",
+                                    style: context.textTheme.bodyMedium!.copyWith(
+                                      fontFamily: FontFamily.w500,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 20),
+                          Text(
+                            "Description",
+                            style: context.textTheme.bodyMedium!.copyWith(
+                              color: context.colorScheme.onSecondary,
+                              fontFamily: FontFamily.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            state.description ?? '',
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: context.textTheme.bodyLarge!.copyWith(
+                              fontFamily: FontFamily.w400,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            "Difficulty",
+                            style: context.textTheme.bodyMedium!.copyWith(
+                              color: context.colorScheme.onSecondary,
+                              fontFamily: FontFamily.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          DropdownButton<String>(
+                            items:
+                                difficulty.entries
+                                    .map(
+                                      (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
+                                    )
+                                    .toList(),
+                            value: state.difficulty,
+                            hint: Text("Select quiz difficulty"),
+                            isExpanded: true,
+                            borderRadius: BorderRadius.circular(10),
+                            focusColor: context.colorScheme.secondary,
+                            onChanged: (v) {
+                              context.read<CreateQuizCubit>().update(
+                                (up) => up.copyWith(difficulty: v),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            "Quiz Type",
+                            style: context.textTheme.bodyMedium!.copyWith(
+                              color: context.colorScheme.onSecondary,
+                              fontFamily: FontFamily.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          DropdownButton(
+                            items:
+                                types.entries
+                                    .map(
+                                      (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
+                                    )
+                                    .toList(),
+                            value: state.type,
+                            hint: Text("Select quiz type"),
+                            isExpanded: true,
+                            borderRadius: BorderRadius.circular(10),
+                            focusColor: context.colorScheme.secondary,
+                            onChanged: (v) {
+                              context.read<CreateQuizCubit>().update((up) => up.copyWith(type: v));
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              elevation: 0,
+                              minimumSize: Size.fromHeight(46),
+                              backgroundColor: Color(0xff6A5AE0),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            onPressed:
+                                state.difficulty == null || state.type == null
+                                    ? null
+                                    : () {
+                                      Navigator.pushNamed(context, NavRoute.quizScreen.path);
+                                    },
+                            child: Text(
+                              "Play Now",
+                              style: context.textTheme.bodyMedium!.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }

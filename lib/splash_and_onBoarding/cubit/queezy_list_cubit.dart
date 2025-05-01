@@ -8,12 +8,16 @@ class QueezyListCubit extends Cubit<Result<List<QueezyModel>>> {
   final QueezyService _queezyService;
   QueezyListCubit(this._queezyService) : super(Result(isLoading: true));
 
-  Future<void> getquestion({String? difficulity, String? category}) async {
+  Future<void> getquestion({String? difficulity, String? category, String? type}) async {
     try {
       emit(Result(isLoading: true));
-      final response = await _queezyService.getQuizData(difficulity: difficulity,category: category);
+      final response = await _queezyService.getQuizData(
+        difficulity: difficulity,
+        category: category,
+        type: type,
+      );
       emit(Result(data: response));
-    }on DioException catch (e) {
+    } on DioException catch (e) {
       emit(Result(error: e.toString()));
     }
   }

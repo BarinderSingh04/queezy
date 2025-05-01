@@ -16,7 +16,6 @@ class DioSingleton {
         },
       ),
     );
-    // dio.interceptors.add(TokenService.instance.interceptor);
     dio.interceptors.add(LogInterceptor());
    }
   late Dio dio;

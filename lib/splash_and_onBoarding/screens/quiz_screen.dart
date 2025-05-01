@@ -1,25 +1,37 @@
-import 'package:countdown_progress_indicator/countdown_progress_indicator.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:queezy/common/common.dart';
-import 'package:queezy/splash_and_onBoarding/cubit/queezy_list_cubit.dart';
-import 'package:queezy/model/result.dart';
-import 'package:queezy/routes/routes.dart';
-import 'package:queezy/splash_and_onBoarding/models/queezy_model.dart';
-import 'package:queezy/splash_and_onBoarding/models/quiz_result.dart';
+import 'package:queezy/splash_and_onBoarding/cubit/create_quiz_cubit.dart';
+import 'package:queezy/splash_and_onBoarding/models/create_quiz.dart';
+
+import '../../common/common.dart';
+import '../cubit/queezy_list_cubit.dart';
+import '../../model/result.dart';
+import '../../routes/routes.dart';
+import '../cubit/quiz_state_cubit.dart';
+import '../models/queezy_model.dart';
+import 'package:html_unescape/html_unescape.dart';
 
 class QuizScreen extends StatefulWidget {
-  QuizScreen({super.key, this.selectedDifficulity});
-  final String? selectedDifficulity;
+  QuizScreen({super.key});
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
 }
 
 class _QuizScreenState extends State<QuizScreen> {
-  final int totalQuestions = 10;
+  @override
+  void initState() {
+    final state = context.read<CreateQuizCubit>().state;
+    context.read<QueezyListCubit>().getquestion(
+      difficulity: state.difficulty,
+      category: state.categoryId.toString(),
+      type: state.type,
+    );
+    super.initState();
+  }
 
-  int currentQuestion = 1;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,22 +53,24 @@ class _QuizScreenState extends State<QuizScreen> {
                       children: [
                         Icon(Icons.person, color: Colors.white),
                         SizedBox(width: 4),
-                        Text(
-                          '1',
-                          style: TextStyle(
-                            color: context.colorScheme.onPrimary,
-                          ),
-                        ),
+                        Text('1', style: TextStyle(color: context.colorScheme.onPrimary)),
                       ],
                     ),
                   ),
                   SizedBox(width: 12),
-                  Expanded(
-                    child: LinearProgressIndicator(
-                      value: (currentQuestion) / totalQuestions,
-                      backgroundColor: Colors.white24,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
+                  BlocSelector<QuizStateCubit, QuizState, int>(
+                    selector: (state) => state.answers.length,
+                    builder: (context, state) {
+                      final progress = state / 10;
+                      return Expanded(
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          borderRadius: BorderRadius.circular(10),
+                          backgroundColor: Colors.white24,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      );
+                    },
                   ),
                   SizedBox(width: 12),
                   Container(
@@ -70,7 +84,7 @@ class _QuizScreenState extends State<QuizScreen> {
                         Icon(Icons.extension, size: 16, color: Colors.white),
                         SizedBox(width: 4),
                         Text(
-                          '35',
+                          '100',
                           style: context.textTheme.bodySmall!.copyWith(
                             color: context.colorScheme.onPrimary,
                           ),
@@ -81,7 +95,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 ],
               ),
             ),
-            MCQQuesWidget(difficulity: widget.selectedDifficulity),
+            MCQQuesWidget(),
           ],
         ),
       ),
@@ -90,8 +104,7 @@ class _QuizScreenState extends State<QuizScreen> {
 }
 
 class MCQQuesWidget extends StatefulWidget {
-  const MCQQuesWidget({super.key, required this.difficulity});
-  final String? difficulity;
+  const MCQQuesWidget({super.key});
 
   @override
   State<MCQQuesWidget> createState() => _MCQQuesWidgetState();
@@ -99,19 +112,7 @@ class MCQQuesWidget extends StatefulWidget {
 
 class _MCQQuesWidgetState extends State<MCQQuesWidget> {
   final PageController _pageController = PageController();
-
-  int currentQuestion = 1;
   int currentPage = 0;
-
-  String? selected;
-
-  int skipped = 0;
-  int incorrect = 0;
-  double completion = 0;
-  final _controller = CountDownController();
-
-  bool isAnswered = false;
-  List<Map<String, dynamic>> answers = [];
 
   @override
   Widget build(BuildContext context) {
@@ -135,110 +136,101 @@ class _MCQQuesWidgetState extends State<MCQQuesWidget> {
 
         final questions = state.data ?? [];
 
-        return Expanded(
-          child: PageView.builder(
-            controller: _pageController,
-            itemCount: questions.length,
-            onPageChanged: (index) {
-              setState(() {
-                currentPage = index;
-              });
-            },
-            itemBuilder: (context, index) {
-              final question = questions[index];
-              final totalQuestions = questions.length;
+        if (questions.isEmpty) {
+          return Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Image.asset('assets/images/empty_state.png'),
+                  Text(
+                    "Looks like we are unable to find quiz related to your request. Please change the options and try again.",
+                    style: context.textTheme.titleMedium!.copyWith(
+                      color: context.colorScheme.onPrimary,
+                    ),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text("Back"),
+                  ),
+                ],
+              ),
+            ),
+          ).animate().move(delay: 300.ms, duration: 250.ms, curve: Curves.easeInOut).fade();
+        }
 
-              return QuestionPage(
-                questionNumber: index + 1,
-                difficulity: widget.difficulity ?? "",
-                onTap: (String option) {
+        return BlocBuilder<CreateQuizCubit, CreateQuiz>(
+          builder: (context, state) {
+            return Expanded(
+              child: PageView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                controller: _pageController,
+                itemCount: questions.length,
+                onPageChanged: (index) {
                   setState(() {
-                    selected = option;
-                    isAnswered = true;
-
-                    if (selected == question.correctAnswer) {
-                      Future.delayed(Duration(milliseconds: 500), () {
-                        if (currentPage < questions.length - 1) {
-                          _pageController.nextPage(
-                            duration: Duration(milliseconds: 300),
-                            curve: Curves.easeIn,
-                          );
-                          _controller.restart(initialPosition: 10);
-                        }
-                        selected = null;
-                        isAnswered = false;
-                      });
-                    } else {
-                      setState(() {
-                        incorrect++;
-                      });
-                      Future.delayed(Duration(milliseconds: 500), () {
-                        if (currentPage < questions.length - 1) {
-                          _pageController.nextPage(
-                            duration: Duration(milliseconds: 300),
-                            curve: Curves.easeIn,
-                          );
-                          // _controller.restart(initialPosition: 10);
-                        } else {
-                          final score = questions.length - incorrect;
-                          if (skipped == 0 &&
-                              (score + incorrect) == questions.length) {
-                            completion = (score / questions.length) * 100;
-                          }
-                          Navigator.pushNamed(
-                            context,
-                            NavRoute.resultScreen.path,
-                            arguments: QuizResult(
-                              correct: score,
-                              skipped: skipped,
-                              incorrect: incorrect,
-                              completion: completion,
-                            ),
-                          );
-                        }
-                        selected = null;
-                        isAnswered = false;
-                      });
-                    }
+                    currentPage = index;
                   });
                 },
-                onComplete: () {
-                  final userAnswere = selected;
-                  if (userAnswere == null) {
-                    setState(() {
-                      skipped++;
-                    });
-                  }
-                  if (currentPage < questions.length - 1) {
-                    _pageController.nextPage(
-                      duration: Duration(milliseconds: 300),
-                      curve: Curves.easeIn,
-                    );
-                    _controller.restart(initialPosition: 10);
-                  }
-                  setState(() {
-                    selected = null;
-                    isAnswered = false;
-                  });
+                itemBuilder: (context, index) {
+                  final question = questions[index];
+                  final totalQuestions = questions.length;
+
+                  return QuestionPage(
+                    questionNumber: index + 1,
+                    difficulity: state.difficulty ?? "",
+                    onTap: (String option) {
+                      context.read<QuizStateCubit>().attempt(
+                        index: index,
+                        givenAnswer: option,
+                        correctAnswer: question.correctAnswer!,
+                        question: question.question!,
+                      );
+                      Future.delayed(Duration(seconds: 1), () {
+                        _navigatePage(questions, context);
+                      });
+                    },
+                    onComplete: () {
+                      context.read<QuizStateCubit>().attempt(
+                        index: index,
+                        givenAnswer: null,
+                        question: question.question!,
+                        correctAnswer: question.correctAnswer!,
+                      );
+                      _navigatePage(questions, context);
+                    },
+                    totalQuestions: totalQuestions,
+                    question: question,
+                  );
                 },
-                totalQuestions: totalQuestions,
-                question: question,
-                selected: selected,
-              );
-            },
-          ),
+              ),
+            ).animate().fade();
+          },
         );
       },
     );
   }
+
+  void _navigatePage(List<QueezyModel> questions, BuildContext context) {
+    if (currentPage < questions.length - 1) {
+      _pageController.nextPage(duration: Duration(milliseconds: 300), curve: Curves.easeIn);
+    } else {
+      Navigator.pushNamed(context, NavRoute.resultScreen.path);
+    }
+  }
 }
 
-class QuestionPage extends StatelessWidget {
+class QuestionPage extends StatefulWidget {
   const QuestionPage({
     super.key,
     required this.totalQuestions,
     required this.question,
-    required this.selected,
     required this.onComplete,
     required this.onTap,
     required this.difficulity,
@@ -251,23 +243,49 @@ class QuestionPage extends StatelessWidget {
   final QueezyModel question;
   final String difficulity;
   final int questionNumber;
-  final String? selected;
+
+  @override
+  State<QuestionPage> createState() => _QuestionPageState();
+}
+
+class _QuestionPageState extends State<QuestionPage> with SingleTickerProviderStateMixin {
+  String? selected;
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: Duration(seconds: 10));
+    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller)..addListener(() {
+      setState(() {});
+    });
+    _controller.forward();
+
+    _controller.addListener(() {
+      if (_controller.isCompleted) {
+        widget.onComplete();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.all(16),
       padding: EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
-      ),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(28)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 10),
           Text(
-            difficulity,
+            widget.difficulity,
             style: context.textTheme.bodyMedium!.copyWith(
               color: context.colorScheme.onSecondary,
               fontFamily: FontFamily.w500,
@@ -275,268 +293,91 @@ class QuestionPage extends StatelessWidget {
           ),
           Center(
             child: SizedBox(
-              height: 100,
-              width: 100,
-              child: CountDownProgressIndicator(
-                strokeWidth: 50,
-                valueColor: Colors.pink.shade100,
-                backgroundColor: Colors.transparent,
-                initialPosition: 0,
-                duration: 10,
-                onComplete: onComplete,
+              height: 80,
+              width: 80,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation(Colors.pink.shade100),
+                      value: _animation.value,
+                      backgroundColor: Colors.grey.shade100,
+                      strokeCap: StrokeCap.round,
+                      strokeWidth: 14,
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      "${(_animation.value * 10).round()}",
+                      style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
           SizedBox(height: 20),
           Text(
-            'Question $questionNumber of $totalQuestions',
+            'Question ${widget.questionNumber} of ${widget.totalQuestions}',
             style: context.textTheme.bodyMedium!.copyWith(
               color: context.colorScheme.onSecondary,
               fontFamily: FontFamily.w500,
             ),
           ),
           SizedBox(height: 10),
-
-          Text(question.question ?? '', style: context.textTheme.titleLarge),
+          Text(
+            HtmlUnescape().convert(widget.question.question ?? ''),
+            style: context.textTheme.titleLarge,
+          ),
           SizedBox(height: 24),
           Expanded(
-            child: ListView.separated(
-              itemCount: question.randomOptions.length,
-              itemBuilder: (BuildContext context, int optionIndex) {
-                final optionText = question.randomOptions[optionIndex];
-                bool isCorrect = selected == question.correctAnswer;
-                bool isSelected = selected == optionText;
+            child:
+                Wrap(
+                  runSpacing: 16,
+                  spacing: 16,
+                  children: List.generate(widget.question.randomOptions!.length, (index) {
+                    final optionText = widget.question.randomOptions![index];
+                    bool isCorrect = selected == widget.question.correctAnswer;
+                    bool isSelected = selected == optionText;
 
-                return InkWell(
-                  onTap: () {
-                    onTap!(optionText);
-                  },
-                  child: Container(
-                    margin: EdgeInsets.symmetric(vertical: 8),
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    decoration: BoxDecoration(
-                      color:
-                          isSelected
-                              ? (isCorrect ? Colors.green : Colors.red)
-                              : Colors.white,
-
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: Text(
-                      optionText,
-                      style:
-                          isSelected
-                              ? context.textTheme.bodyLarge!.copyWith(
-                                fontFamily: FontFamily.w500,
-                              )
-                              : context.textTheme.bodyLarge,
-                    ),
-                  ),
-                );
-              },
-              separatorBuilder: (BuildContext context, int index) {
-                return const SizedBox(height: 10);
-              },
-            ),
+                    return InkWell(
+                      onTap:
+                          selected != null
+                              ? null
+                              : () {
+                                widget.onTap!(optionText);
+                                setState(() {
+                                  selected = optionText;
+                                });
+                                _controller.stop();
+                              },
+                      child: Container(
+                        width: double.infinity,
+                        margin: EdgeInsets.symmetric(vertical: 8),
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        decoration: BoxDecoration(
+                          color:
+                              isSelected ? (isCorrect ? Colors.green : Colors.red) : Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: Text(
+                          HtmlUnescape().convert(optionText),
+                          style:
+                              isSelected
+                                  ? context.textTheme.bodyLarge!.copyWith(
+                                    fontFamily: FontFamily.w500,
+                                  )
+                                  : context.textTheme.bodyLarge,
+                        ),
+                      ),
+                    );
+                  }),
+                ).animate().move(delay: 250.ms, duration: 250.ms, curve: Curves.bounceInOut).fade(),
           ),
         ],
       ),
     );
   }
 }
-
-// class TrueFalseWidget extends StatefulWidget {
-//   const TrueFalseWidget({super.key});
-
-//   @override
-//   State<TrueFalseWidget> createState() => _TrueFalseWidgetState();
-// }
-
-// class _TrueFalseWidgetState extends State<TrueFalseWidget> {
-//   final PageController _pageController = PageController();
-
-//   final int totalQuestions = 2;
-
-//   int currentQuestion = 1;
-
-//   String? selected;
-
-//   int skipped = 0;
-
-//   final _controller = CountDownController();
-
-//   bool isAnswered = false;
-
-//   final List<Map<String, dynamic>> questions = [
-//     {
-//       'question': 'Theodorus of Samos is the person who invented keys??',
-//       'options': ['True', 'False'],
-//       'correct': "True",
-//     },
-//     {
-//       'question': 'Are you human?',
-//       'options': ['True', 'False'],
-//       'correct': "True",
-//     },
-//   ];
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Expanded(
-//       child: PageView.builder(
-//         controller: _pageController,
-//         itemCount: questions.length,
-//         onPageChanged: (index) {},
-//         itemBuilder: (context, index) {
-//           final question = questions[index];
-//           return Container(
-//             margin: EdgeInsets.all(16),
-//             padding: EdgeInsets.all(20),
-//             decoration: BoxDecoration(
-//               color: Colors.white,
-//               borderRadius: BorderRadius.circular(28),
-//             ),
-//             child: Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 const SizedBox(height: 10),
-
-//                 Center(
-//                   child: SizedBox(
-//                     height: 100,
-//                     width: 100,
-//                     child: CountDownProgressIndicator(
-//                       controller: _controller,
-//                       strokeWidth: 50,
-//                       valueColor: Colors.pink.shade100,
-//                       backgroundColor: Colors.transparent,
-//                       initialPosition: 0,
-//                       duration: 10,
-//                       onComplete: () {
-//                         if (selected != question["correct"]) {
-//                           setState(() {
-//                             skipped++;
-//                             selected = null;
-//                             isAnswered = false;
-
-//                             if (_pageController.page!.round() <
-//                                 totalQuestions - 1) {
-//                               _pageController.nextPage(
-//                                 duration: Duration(milliseconds: 300),
-//                                 curve: Curves.easeIn,
-//                               );
-//                               _controller.restart(initialPosition: 10);
-//                             } else {
-//                               final score = totalQuestions - skipped;
-//                               Navigator.pushNamed(
-//                                 context,
-//                                 NavRoute.resultScreen.path,
-//                                 arguments: score,
-//                               );
-//                             }
-//                           });
-//                         }
-//                       },
-//                     ),
-//                   ),
-//                 ),
-//                 SizedBox(height: 20),
-//                 Text(
-//                   'Question ${index + 1} of $totalQuestions',
-//                   style: context.textTheme.bodyMedium!.copyWith(
-//                     color: context.colorScheme.onSecondary,
-//                     fontFamily: FontFamily.w500,
-//                   ),
-//                 ),
-//                 SizedBox(height: 10),
-//                 Center(
-//                   child: Image.asset("assets/images/boolIllustration.png"),
-//                 ),
-//                 const SizedBox(height: 10),
-//                 Text(
-//                   question["question"].toString(),
-//                   style: context.textTheme.titleLarge,
-//                 ),
-//                 SizedBox(height: 24),
-//                 Expanded(
-//                   child: ListView.separated(
-//                     itemCount: question["options"].length,
-//                     itemBuilder: (BuildContext context, int optionIndex) {
-//                       final optionText = question["options"][optionIndex];
-//                       bool isCorrect = selected == question["correct"];
-//                       bool isSelected = selected == optionText;
-
-//                       return InkWell(
-//                         onTap:
-//                             selected == null
-//                                 ? () {
-//                                   setState(() {
-//                                     selected = optionText;
-//                                     isAnswered = true;
-
-//                                     if (selected == question["correct"]) {
-//                                       Future.delayed(
-//                                         Duration(milliseconds: 500),
-//                                         () {
-//                                           if (_pageController.page!.round() <
-//                                               totalQuestions - 1) {
-//                                             _pageController.nextPage(
-//                                               duration: Duration(
-//                                                 milliseconds: 300,
-//                                               ),
-//                                               curve: Curves.easeIn,
-//                                             );
-//                                             _controller.restart(
-//                                               initialPosition: 10,
-//                                             );
-//                                           }
-//                                           selected = null;
-//                                           isAnswered = false;
-//                                         },
-//                                       );
-//                                     }
-//                                   });
-//                                 }
-//                                 : null,
-
-//                         child: Container(
-//                           margin: EdgeInsets.symmetric(vertical: 8),
-//                           padding: EdgeInsets.symmetric(
-//                             horizontal: 16,
-//                             vertical: 14,
-//                           ),
-//                           decoration: BoxDecoration(
-//                             color:
-//                                 isSelected
-//                                     ? (isCorrect ? Colors.green : Colors.red)
-//                                     : Colors.white,
-
-//                             borderRadius: BorderRadius.circular(16),
-//                             border: Border.all(color: Colors.grey.shade300),
-//                           ),
-//                           child: Text(
-//                             optionText,
-//                             style:
-//                                 isSelected
-//                                     ? context.textTheme.bodyLarge!.copyWith(
-//                                       fontFamily: FontFamily.w500,
-//                                     )
-//                                     : context.textTheme.bodyLarge,
-//                           ),
-//                         ),
-//                       );
-//                     },
-//                     separatorBuilder: (BuildContext context, int index) {
-//                       return const SizedBox(height: 10);
-//                     },
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           );
-//         },
-//       ),
-//     );
-//   }
-// }
