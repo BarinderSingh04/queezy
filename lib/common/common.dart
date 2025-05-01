@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-String baseUrl = "https://opentdb.com/api.php?";
+String baseUrl = "http://192.168.1.8:3001/";
+String apiUrl = "$baseUrl/api/";
 
 abstract class FontFamily {
   static String get w700 => "Rubik_Bold";

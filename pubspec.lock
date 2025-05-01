@@ -193,6 +193,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.1"
+  device_frame:
+    dependency: transitive
+    description:
+      name: device_frame
+      sha256: d031a06f5d6f4750009672db98a5aa1536aa4a231713852469ce394779a23d75
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
+  device_preview:
+    dependency: "direct main"
+    description:
+      name: device_preview
+      sha256: a694acdd3894b4c7d600f4ee413afc4ff917f76026b97ab06575fe886429ef19
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   dio:
     dependency: "direct main"
     description:
@@ -209,6 +225,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  equatable:
+    dependency: transitive
+    description:
+      name: equatable
+      sha256: "567c64b3cb4cf82397aac55f4f0cbd3ca20d77c6c03bedbc4ceaddc08904aef7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.7"
   fake_async:
     dependency: transitive
     description:
@@ -241,6 +265,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+  fl_chart:
+    dependency: "direct main"
+    description:
+      name: fl_chart
+      sha256: f2e9137f261d0f53a820f6b829c80ba570ac915284c8e32789d973834796eca0
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.71.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -262,6 +294,11 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.0"
+  flutter_localizations:
+    dependency: transitive
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   flutter_secure_storage:
     dependency: "direct main"
     description:
@@ -320,6 +357,30 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  freezed_annotation:
+    dependency: transitive
+    description:
+      name: freezed_annotation
+      sha256: c2e2d632dd9b8a2b7751117abcfc2b4888ecfe181bd9fca7170d9ef02e595fe2
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.4"
+  fresh:
+    dependency: transitive
+    description:
+      name: fresh
+      sha256: "9d345f48d4685781a5d8768b05634a0b2a46dfacec42c4b9d4b49ebe5127ef2e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.3"
+  fresh_dio:
+    dependency: "direct main"
+    description:
+      name: fresh_dio
+      sha256: "3140345fd9aba5d82a8fc6809d79311ac089dd8c723523c3abcb9e8efcaba780"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.3"
   frontend_server_client:
     dependency: transitive
     description:
@@ -352,6 +413,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.2"
+  html_unescape:
+    dependency: "direct main"
+    description:
+      name: html_unescape
+      sha256: "15362d7a18f19d7b742ef8dcb811f5fd2a2df98db9f80ea393c075189e0b61e3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   http:
     dependency: transitive
     description:
@@ -376,6 +445,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
+  intl:
+    dependency: transitive
+    description:
+      name: intl
+      sha256: d6f56758b7d3014a48af9701c085700aac781a92a87a62b1333b46d8879661cf
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.19.0"
   io:
     dependency: transitive
     description:
@@ -677,6 +754,22 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  socket_io_client:
+    dependency: "direct main"
+    description:
+      name: socket_io_client
+      sha256: c8471c2c6843cf308a5532ff653f2bcdb7fa9ae79d84d1179920578a06624f0d
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.2"
+  socket_io_common:
+    dependency: transitive
+    description:
+      name: socket_io_common
+      sha256: "162fbaecbf4bf9a9372a62a341b3550b51dcef2f02f3e5830a297fd48203d45b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.1"
   source_gen:
     dependency: transitive
     description:
@@ -733,6 +826,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.1"
+  syncfusion_flutter_core:
+    dependency: transitive
+    description:
+      name: syncfusion_flutter_core
+      sha256: "720ea28f0ab8f8c19fc613c20b978e514c7e4e431171fd85ed8da528e01298e0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "29.1.39"
+  syncfusion_flutter_gauges:
+    dependency: "direct main"
+    description:
+      name: syncfusion_flutter_gauges
+      sha256: f8ce424dabe97c10ccf84421f8ab20714ae2697bb103d223e6e33c458a2f3825
+      url: "https://pub.dev"
+    source: hosted
+    version: "29.1.39"
   term_glyph:
     dependency: transitive
     description:

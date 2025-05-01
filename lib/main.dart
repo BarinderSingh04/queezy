@@ -1,3 +1,4 @@
+import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:queezy/di/service_locator.dart';
@@ -9,7 +10,16 @@ import 'theme/app_theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await setupServiceLocator();
-  runApp(BlocProvider(create: (context) => ThemeCubit(), child: const MyApp()));
+  runApp(
+    DevicePreview(
+      enabled: false,
+      builder:
+          (context) => BlocProvider(
+            create: (context) => ThemeCubit(),
+            child: const MyApp(),
+      ),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -22,12 +32,25 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final router = getIt<NavRouter>();
 
+ 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ThemeCubit, ThemeMode>(
       builder: (contex, state) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
+          builder: (context, child) {
+            DevicePreview.appBuilder;
+            final mediaQueryData = MediaQuery.of(context);
+            return MediaQuery(
+              data: mediaQueryData.copyWith(
+                textScaler: const TextScaler.linear(1.0),
+              ),
+              child: child!,
+            );
+          },
+
+          locale: DevicePreview.locale(context),
           title: 'Flutter Demo',
           theme: AppTheme().lightTheme,
           themeMode: state,
