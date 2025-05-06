@@ -21,20 +21,26 @@ class AuthService {
     try {
       final response = await DioSingleton.instance.dio.post(
         "register",
-        data: {"email": email},
+        data: {
+          "email": email,
+          "password": password,
+          "name": name,
+          "avatar": avatar,
+          "confirmPassword": confirmPassword,
+        },
       );
       final body = response.data;
-      return AuthModel.fromJson(body['data']);
+      final auth = AuthModel.fromJson(body);
+      _tokenService.setToken(TokenModel.fromMap(body));
+      await _localStorageService.saveUser(auth.data!);
+      return auth;
     } on DioException catch (e) {
       print("signup error: $e");
       throw DioExceptions.fromDioError(e);
     }
   }
 
-  Future<AuthModel> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<AuthModel> login({required String email, required String password}) async {
     try {
       final response = await DioSingleton.instance.dio.post(
         'login',
@@ -42,9 +48,9 @@ class AuthService {
       );
       final body = response.data;
       final content = body;
-      final user = AuthModel.fromJson(content);
+      final auth = AuthModel.fromJson(content);
       _tokenService.setToken(TokenModel.fromMap(content));
-      await _localStorageService.saveUser(user);
+      await _localStorageService.saveUser(auth.data!);
       return AuthModel.fromJson(body["data"]);
     } on DioException catch (e) {
       print("login error: $e");

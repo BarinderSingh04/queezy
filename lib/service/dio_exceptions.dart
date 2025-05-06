@@ -2,8 +2,6 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 
-
-
 class DioExceptions implements Exception {
   DioExceptions.fromDioError(DioException dioError) {
     switch (dioError.type) {

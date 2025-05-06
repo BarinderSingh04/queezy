@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:queezy/common/common.dart';
+import 'package:queezy/di/service_locator.dart';
+import 'package:queezy/routes/routes.dart';
+import 'package:queezy/service/token_service.dart';
 
 import 'profile_widget.dart';
 import 'search_screen.dart';
@@ -16,15 +19,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        actions: [Icon(Icons.settings, color: context.colorScheme.onPrimary)],
+        actions: [
+          IconButton(
+            onPressed: () {
+              getIt<TokenService>().clearToken();
+              Navigator.of(context).pushNamedAndRemoveUntil(NavRoute.login.path, (route) => false);
+            },
+            icon: Icon(Icons.settings, color: context.colorScheme.onPrimary),
+          ),
+        ],
       ),
       body: Stack(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage("assets/images/profile_bg.png"),
-                fit: BoxFit.cover,
+          InkWell(
+            onTap: () {},
+            child: Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("assets/images/profile_bg.png"),
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
@@ -48,17 +62,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(height: 48),
                     Text(
                       "Madelyn Dias",
-                      style: context.textTheme.headlineSmall!.copyWith(
-                        fontFamily: FontFamily.w500,
-                      ),
+                      style: context.textTheme.headlineSmall!.copyWith(fontFamily: FontFamily.w500),
                     ),
                     const SizedBox(height: 24),
                     const PointsContainer(),
                     const SizedBox(height: 10),
-                    SizedBox(
-                      height: 500, 
-                      child: const ProfileTabView(),
-                    ),
+                    SizedBox(height: 500, child: const ProfileTabView()),
                   ],
                 ),
               ),
@@ -68,17 +77,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             top: 0,
             left: 138,
             right: 138,
-            child: Center(
-              child: Image.asset("assets/images/3x/avatar1.png", scale: 1.6),
-            ),
+            child: Center(child: Image.asset("assets/images/3x/avatar1.png", scale: 1.6)),
           ),
           Positioned(
             top: 80,
             left: 228,
             right: 138,
-            child: Center(
-              child: Image.asset("assets/images/3x/hungary.png", scale: 1.8),
-            ),
+            child: Center(child: Image.asset("assets/images/3x/hungary.png", scale: 1.8)),
           ),
         ],
       ),
@@ -183,20 +188,12 @@ class ProfileTabView extends StatelessWidget {
             indicator: CircleTabIndicator(color: Colors.deepPurple, radius: 3),
             labelColor: Colors.deepPurple,
             unselectedLabelColor: Colors.grey,
-            tabs: const [
-              Tab(text: 'Badge'),
-              Tab(text: 'Stats'),
-              Tab(text: 'Details'),
-            ],
+            tabs: const [Tab(text: 'Badge'), Tab(text: 'Stats'), Tab(text: 'Details')],
           ),
           const SizedBox(height: 12),
           Expanded(
             child: TabBarView(
-              children: [
-                buildBadgeTab(),
-                StatsWidget(),
-                Center(child: Text('Details Content')),
-              ],
+              children: [buildBadgeTab(), StatsWidget(), Center(child: Text('Details Content'))],
             ),
           ),
         ],

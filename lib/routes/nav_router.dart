@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:queezy/screens/cubit/queezy_list_cubit.dart';
+import 'package:queezy/screens/cubit/avatar_list_cubit.dart';
+import 'package:queezy/screens/cubit/create_room_cubit.dart';
+import 'package:queezy/screens/cubit/game_session_cubit.dart';
 import 'package:queezy/routes/routes.dart';
 import 'package:queezy/screens/cubit/quiz_logic_cubit.dart';
+import 'package:queezy/screens/cubit/quiz_room_cubit.dart';
+import 'package:queezy/screens/models/room_model.dart';
 import 'package:queezy/screens/screens/choose_category_screen.dart';
 import 'package:queezy/screens/screens/choose_difficulity_screen.dart';
 import 'package:queezy/screens/screens/home_screen.dart';
@@ -36,15 +40,15 @@ class NavRouter {
     NavRoute.loginSignupOption.path: (context) => LoginSignupOptionScreen(),
     NavRoute.signup.path: (context) => SignupScreen(),
     NavRoute.signupPage.path:
-        (context) => BlocProvider(
-          create: (context) => getIt<AuthCubit>(),
+        (context) => MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (context) => getIt<AuthCubit>()),
+            BlocProvider(create: (context) => getIt<AvatarListCubit>()..getAvatarList()),
+          ],
           child: SignUpPage(),
         ),
     NavRoute.login.path:
-        (context) => BlocProvider(
-          create: (context) => getIt<AuthCubit>(),
-          child: LoginScreen(),
-        ),
+        (context) => BlocProvider(create: (context) => getIt<AuthCubit>(), child: LoginScreen()),
     NavRoute.resetPassword.path: (context) => ResetPasswordScreen(),
     NavRoute.newPassword.path: (context) => NewPasswordScreen(),
     NavRoute.bottomNav.path: (context) => QuizBottomNav(),
@@ -59,38 +63,41 @@ class NavRouter {
   MaterialPageRoute? onGenerateRoute(RouteSettings settings) {
     if (NavRoute.inviteFriend.path == settings.name) {
       final code = settings.arguments as String;
-      return MaterialPageRoute(
-        builder: (context) => InviteFriendsScreen(code: code),
-      );
+      return MaterialPageRoute(builder: (context) => InviteFriendsScreen(code: code));
     }
     if (NavRoute.chooseType.path == settings.name) {
-      final selectedCategory = settings.arguments as Map<String, dynamic>;
-      return MaterialPageRoute(
-        builder:
-            (context) =>
-                ChooseDifficulityScreen(selectedCategory: selectedCategory),
-      );
-    }
-    if (NavRoute.quizDetails.path == settings.name) {
-      final quizDetails = settings.arguments as Map<String, dynamic>;
+      final selectedCategoryId = settings.arguments as int;
       return MaterialPageRoute(
         builder:
             (context) => BlocProvider(
-              create: (context) => getIt<QueezyListCubit>(),
+              create: (context) => getIt<CreateRoomCubit>(),
+              child: ChooseDifficulityScreen(selectedCategoryId: selectedCategoryId),
+            ),
+      );
+    }
+    if (NavRoute.quizDetails.path == settings.name) {
+      final quizDetails = settings.arguments as RoomModel;
+      return MaterialPageRoute(
+        builder:
+            (context) => MultiBlocProvider(
+              providers: [
+                BlocProvider(create: (context) => getIt<GameSessionCubit>()),
+                BlocProvider(create: (context) => getIt<QuizRoomBloc>()),
+              ],
               child: QuizDetailsScreen(quizDetails: quizDetails),
             ),
       );
     }
     if (NavRoute.quizScreen.path == settings.name) {
-      final category = settings.arguments as Map<String, dynamic>;
+      final difficulty = settings.arguments as String;
       return MaterialPageRoute(
         builder:
             (context) => MultiBlocProvider(
               providers: [
-                BlocProvider.value(value: getIt<QueezyListCubit>()),
+                BlocProvider.value(value: getIt<GameSessionCubit>()),
                 BlocProvider(create: (context) => getIt<QuizLogicCubit>()),
               ],
-              child: QuizScreen(quizDetails: category),
+              child: QuizScreen(difficulty: difficulty),
             ),
       );
     }
@@ -107,10 +114,8 @@ class NavRouter {
     if (NavRoute.reviewQuiz.path == settings.name) {
       return MaterialPageRoute(
         builder:
-            (context) => BlocProvider.value(
-              value: getIt<QuizLogicCubit>(),
-              child: ReviewQuizScreen(),
-            ),
+            (context) =>
+                BlocProvider.value(value: getIt<QuizLogicCubit>(), child: ReviewQuizScreen()),
       );
     }
     return null;

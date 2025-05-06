@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:queezy/common/common.dart';
 
 class PrimaryIconButton extends StatelessWidget {
@@ -36,11 +37,13 @@ class PrimaryIconButton extends StatelessWidget {
 }
 
 class PrimaryButton extends StatelessWidget {
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
+  final bool isLoading;
   final String label;
 
   const PrimaryButton({
     super.key,
+    this.isLoading = false,
     required this.onPressed,
     required this.label,
   });
@@ -49,13 +52,18 @@ class PrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: onPressed,
-      child: Text(
-        label,
-        style: context.textTheme.bodyLarge!.copyWith(
-          fontFamily: FontFamily.w500,
-          color: context.colorScheme.onPrimary,
-        ),
-      ),
+      child:
+          isLoading
+              ? Center(
+                child: LoadingAnimationWidget.horizontalRotatingDots(color: Colors.white, size: 34),
+              )
+              : Text(
+                label,
+                style: context.textTheme.bodyLarge!.copyWith(
+                  fontFamily: FontFamily.w500,
+                  color: context.colorScheme.onPrimary,
+                ),
+              ),
       style: ElevatedButton.styleFrom(
         fixedSize: Size(MediaQuery.sizeOf(context).width, 50),
         backgroundColor: context.colorScheme.secondary,
@@ -115,9 +123,7 @@ class GoogleLoginButton extends StatelessWidget {
       icon: Image.asset('assets/images/google-g-logo-85b2.png', height: 20),
       label: Text(
         'Login with Google',
-        style: context.textTheme.bodyLarge!.copyWith(
-          fontFamily: FontFamily.w500,
-        ),
+        style: context.textTheme.bodyLarge!.copyWith(fontFamily: FontFamily.w500),
       ),
       style: ElevatedButton.styleFrom(
         fixedSize: Size(MediaQuery.sizeOf(context).width, 56),
@@ -161,11 +167,7 @@ class LightPrimaryButton extends StatelessWidget {
   final VoidCallback onPressed;
   final String label;
 
-  const LightPrimaryButton({
-    super.key,
-    required this.onPressed,
-    required this.label,
-  });
+  const LightPrimaryButton({super.key, required this.onPressed, required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -205,10 +207,7 @@ class PlainTextButton extends StatelessWidget {
       onPressed: onPressed,
       child: Text(
         label,
-        style: context.textTheme.bodyLarge!.copyWith(
-          fontFamily: FontFamily.w500,
-          color: color,
-        ),
+        style: context.textTheme.bodyLarge!.copyWith(fontFamily: FontFamily.w500, color: color),
       ),
     );
   }

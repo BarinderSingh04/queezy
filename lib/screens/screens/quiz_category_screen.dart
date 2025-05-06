@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:queezy/common/common.dart';
 import 'package:queezy/routes/routes.dart';
-import 'package:queezy/screens/models/category_model.dart';
-import 'package:queezy/screens/screens/choose_category_screen.dart';
 
 class QuizCategoryScreen extends StatefulWidget {
   const QuizCategoryScreen({super.key});
@@ -185,31 +183,7 @@ class _QuizCategoryScreenState extends State<QuizCategoryScreen> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    SizedBox(
-                      height: 2180,
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: CategoryGridView(
-                              physics: NeverScrollableScrollPhysics(),
-                              content: content,
-                              selectedCategory: selectedCategory,
-                              onSelect: (item) {
-                                setState(() {
-                                  selectedCategory = item;
-                                  print("Selected Category: $selectedCategory");
-                                });
-                                Navigator.pushNamed(
-                                  context,
-                                  NavRoute.quizDetails.path,arguments: selectedCategory
-                                );
-                              },
-                              colors: colors,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    
                   ],
                 ),
               ),

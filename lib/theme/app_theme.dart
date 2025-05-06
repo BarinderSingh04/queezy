@@ -15,16 +15,14 @@ class AppTheme {
     ),
     brightness: Brightness.light,
     scaffoldBackgroundColor: Color(0xff6A5AE0),
-    textTheme: textTheme.apply(
-      displayColor: Colors.black,
-      bodyColor: Colors.black,
-    ),
+    textTheme: textTheme.apply(displayColor: Colors.black, bodyColor: Colors.black),
     primaryColor: Colors.black,
     useMaterial3: true,
     fontFamily: "Mont_Blanc_Regular",
     appBarTheme: AppBarTheme(
       backgroundColor: Color(0xff6A5AE0),
       surfaceTintColor: Color(0xff6A5AE0),
+      titleTextStyle: TextStyle(fontFamily: FontFamily.w700, fontSize: 22, color: Colors.black),
       iconTheme: IconThemeData(color: Colors.white),
     ),
     buttonTheme: ButtonThemeData(buttonColor: Colors.black),
@@ -53,6 +51,16 @@ class AppTheme {
     cardTheme: CardTheme(color: Colors.white),
     chipTheme: ChipThemeData(
       shape: const StadiumBorder(side: BorderSide(color: Color(0xff808080))),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: Colors.white,
+      hintStyle: TextStyle(color: Color(0xff858494)),
+      contentPadding: EdgeInsets.symmetric(vertical: 18),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
     ),
   );
 

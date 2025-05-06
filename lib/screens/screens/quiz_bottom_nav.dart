@@ -25,11 +25,12 @@ class _QuizBottomNavState extends State<QuizBottomNav> {
     ProfileScreen(),
   ];
 
-@override
+  @override
   void initState() {
-   getIt<SocketService>().initializeSocket();
+    getIt<SocketService>().initializeSocket();
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,7 +41,6 @@ class _QuizBottomNavState extends State<QuizBottomNav> {
             _currentIndex = 2;
           });
         },
-        backgroundColor: Colors.deepPurple,
         child: const Icon(Icons.add, size: 32),
         shape: const CircleBorder(),
       ),

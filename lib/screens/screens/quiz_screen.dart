@@ -1,41 +1,107 @@
-import 'package:countdown_progress_indicator/countdown_progress_indicator.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:queezy/screens/cubit/game_session_cubit.dart';
+
+import '../../common/common.dart';
+import '../../model/result.dart';
+import '../../routes/routes.dart';
+import '../models/queezy_model.dart';
 import 'package:html_unescape/html_unescape.dart';
-import 'package:queezy/common/common.dart';
-import 'package:queezy/di/service_locator.dart';
-import 'package:queezy/screens/cubit/queezy_list_cubit.dart';
-import 'package:queezy/model/result.dart';
-import 'package:queezy/routes/routes.dart';
-import 'package:queezy/screens/cubit/quiz_logic_cubit.dart';
-import 'package:queezy/screens/models/queezy_model.dart';
-import 'package:queezy/screens/models/quiz_result.dart';
-import 'package:queezy/screens/widget/fade_animation.dart';
-import 'package:queezy/service/socket_service.dart';
 
 class QuizScreen extends StatefulWidget {
-  QuizScreen({super.key, this.quizDetails});
-  final Map<String, dynamic>? quizDetails;
+  final String difficulty;
+  QuizScreen({super.key, required this.difficulty});
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
 }
 
 class _QuizScreenState extends State<QuizScreen> {
-  final int totalQuestions = 10;
+  final PageController _pageController = PageController();
+  int currentPage = 0;
 
-  int currentQuestion = 1;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.deepPurple[400],
       body: SafeArea(
         child: Column(
           children: [
-            TopProgressRowWidget(
-              totalQuestions: totalQuestions,
-              
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 12),
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical: 9, horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.deepPurple[300],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.person, color: Colors.white),
+                        SizedBox(width: 4),
+                        Text('1', style: TextStyle(color: context.colorScheme.onPrimary)),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: LinearProgressIndicator(
+                      value: currentPage / 10,
+                      borderRadius: BorderRadius.circular(10),
+                      backgroundColor: Colors.white24,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+
+                  SizedBox(width: 12),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                    decoration: BoxDecoration(
+                      color: Colors.orange,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.extension, size: 16, color: Colors.white),
+                        SizedBox(width: 4),
+                        Text(
+                          '100',
+                          style: context.textTheme.bodySmall!.copyWith(
+                            color: context.colorScheme.onPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-            MCQQuesWidget(category: widget.quizDetails?['category']["id"]),
+            MCQQuesWidget(
+              difficulty: widget.difficulty,
+              pageController: _pageController,
+              onNextTap: (length) {
+                if (currentPage < length! - 1) {
+                  _pageController.nextPage(
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.easeIn,
+                  );
+                } else {
+                  final sessionId = context.read<GameSessionCubit>().state.data?.sessionId;
+                  if (sessionId != null) {
+                    Navigator.pushNamed(context, NavRoute.resultScreen.path, arguments: sessionId);
+                  }
+                }
+              },
+              onPageChanged: (pageIndex) {
+                setState(() {
+                  currentPage = pageIndex;
+                });
+              },
+            ),
           ],
         ),
       ),
@@ -43,107 +109,33 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 }
 
-class TopProgressRowWidget extends StatelessWidget {
-  const TopProgressRowWidget({
+class MCQQuesWidget extends StatelessWidget {
+  final String difficulty;
+  final PageController pageController;
+  final void Function(int)? onPageChanged;
+  final void Function(int? length) onNextTap;
+
+  MCQQuesWidget({
     super.key,
-    required this.totalQuestions,
-   
+    required this.difficulty,
+    required this.pageController,
+    this.onPageChanged,
+    required this.onNextTap,
   });
 
-  final int totalQuestions;
-
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 12),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 9, horizontal: 12),
-            decoration: BoxDecoration(
-              color: Colors.deepPurple[300],
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.person, color: Colors.white),
-                SizedBox(width: 4),
-                Text(
-                  "1",
-                  style: TextStyle(color: context.colorScheme.onPrimary),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: 12),
-          BlocBuilder<QuizLogicCubit, QuizResult>(
-            builder: (context, state) {
-              return Expanded(
-                child: LinearProgressIndicator(
-                  value: (state.answere.length) / totalQuestions,
-                  backgroundColor: Colors.white24,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              );
-            },
-          ),
-          SizedBox(width: 12),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-            decoration: BoxDecoration(
-              color: Colors.orange,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.extension, size: 16, color: Colors.white),
-                SizedBox(width: 4),
-                Text(
-                  '35',
-                  style: context.textTheme.bodySmall!.copyWith(
-                    color: context.colorScheme.onPrimary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class MCQQuesWidget extends StatefulWidget {
-  const MCQQuesWidget({super.key, required this.category});
-  final String? category;
-
-  @override
-  State<MCQQuesWidget> createState() => _MCQQuesWidgetState();
-}
-
-class _MCQQuesWidgetState extends State<MCQQuesWidget> {
-  final PageController _pageController = PageController();
-
-  int currentQuestion = 1;
-  int currentPage = 0;
-
-  String? selected;
-
-  int skipped = 0;
-  int incorrect = 0;
-  double completion = 0;
-
-  bool isAnswered = false;
-  List<Map<String, dynamic>> answers = [];
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<QueezyListCubit, Result<Queezy>>(
+    return BlocBuilder<GameSessionCubit, Result<GameSession>>(
       builder: (context, state) {
         if (state.isLoading) {
           return Expanded(
             child: Center(
-              child: FadingImage(imageUrl: 'assets/images/loading.png'),
+              child: Text(
+                "Loading....",
+                style: context.textTheme.titleMedium!.copyWith(
+                  color: context.colorScheme.onPrimary,
+                ),
+              ),
             ),
           );
         }
@@ -152,110 +144,86 @@ class _MCQQuesWidgetState extends State<MCQQuesWidget> {
         }
 
         final questions = state.data?.questions ?? [];
+        if (questions.isEmpty) {
+          return Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Image.asset('assets/images/empty_state.png'),
+                  Text(
+                    "Looks like we are unable to find quiz related to your request. Please change the options and try again.",
+                    style: context.textTheme.titleMedium!.copyWith(
+                      color: context.colorScheme.onPrimary,
+                    ),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text("Back"),
+                  ),
+                ],
+              ),
+            ),
+          ).animate().move(delay: 300.ms, duration: 250.ms, curve: Curves.easeInOut).fade();
+        }
 
         return Expanded(
           child: PageView.builder(
-            controller: _pageController,
+            physics: NeverScrollableScrollPhysics(),
+            controller: pageController,
             itemCount: questions.length,
-            onPageChanged: (index) {
-              setState(() {
-                currentPage = index;
-              });
-            },
+            onPageChanged: onPageChanged,
             itemBuilder: (context, index) {
               final question = questions[index];
               final totalQuestions = questions.length;
 
               return QuestionPage(
                 questionNumber: index + 1,
+                difficulity: difficulty,
                 onTap: (String option) {
-                  setState(() {
-                    selected = option;
-                  });
-                  context.read<QuizLogicCubit>().getResult(
-                    index: currentPage,
-                    correctAnswer: question.correctAnswer,
-                    answereGiven: selected,
-                    question: question.question,
-                    category: widget.category,
+                  context.read<GameSessionCubit>().submitAnswer(
+                    givenAnswer: option,
+                    correctAnswer: question.correctAnswer!,
+                    question: question.question!,
                   );
-                  getIt<SocketService>().emit("submit_answer", {
-                    "sessionId": state.data?.sessionId,
-                    "question": question.question,
-                    "answer": selected,
-                    "correctAnswer": question.correctAnswer,
-                    "playerId": 27,
-                  });
-                  Future.delayed(Duration(milliseconds: 500), () {
-                    if (currentPage < questions.length - 1) {
-                      _pageController.nextPage(
-                        duration: Duration(milliseconds: 300),
-                        curve: Curves.easeIn,
-                      );
-                    } else {
-                      Navigator.pushNamed(
-                        context,
-                        NavRoute.resultScreen.path,
-                        arguments: state.data?.sessionId,
-                      );
-                    }
-                    selected = null;
-                    isAnswered = false;
+                  Future.delayed(Duration(seconds: 1), () {
+                    onNextTap(questions.length);
                   });
                 },
-
                 onComplete: () {
-                  final userAnswer = selected;
-                  context.read<QuizLogicCubit>().getResult(
-                    index: currentPage,
-                    correctAnswer: question.correctAnswer,
-                    answereGiven: userAnswer,
-                    question: question.question,
-                    category: widget.category,
+                  context.read<GameSessionCubit>().submitAnswer(
+                    givenAnswer: null,
+                    question: question.question!,
+                    correctAnswer: question.correctAnswer!,
                   );
-                  getIt<SocketService>().emit("submit_answer", {
-                    "sessionId": state.data?.sessionId,
-                    "question": question.question,
-                    "answer": userAnswer,
-                    "correctAnswer": question.correctAnswer,
-                    "playerId": 27,
-                  });
-                  if (currentPage < questions.length - 1) {
-                    _pageController.nextPage(
-                      duration: Duration(milliseconds: 300),
-                      curve: Curves.easeIn,
-                    );
-                  } else {
-                    Navigator.pushNamed(
-                      context,
-                      NavRoute.resultScreen.path,
-                      arguments: state.data?.sessionId,
-                    );
-                  }
-                  setState(() {
-                    selected = null;
-                  });
+                  onNextTap(questions.length);
                 },
                 totalQuestions: totalQuestions,
                 question: question,
-                selected: selected,
               );
             },
           ),
-        );
+        ).animate().fade();
       },
     );
   }
 }
 
-class QuestionPage extends StatelessWidget {
+class QuestionPage extends StatefulWidget {
   const QuestionPage({
     super.key,
     required this.totalQuestions,
     required this.question,
-    required this.selected,
     required this.onComplete,
     required this.onTap,
+    required this.difficulity,
     required this.questionNumber,
   });
 
@@ -263,26 +231,51 @@ class QuestionPage extends StatelessWidget {
   final Function(String option)? onTap;
   final int totalQuestions;
   final Questions question;
+  final String difficulity;
   final int questionNumber;
-  final String? selected;
+
+  @override
+  State<QuestionPage> createState() => _QuestionPageState();
+}
+
+class _QuestionPageState extends State<QuestionPage> with SingleTickerProviderStateMixin {
+  String? selected;
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: Duration(seconds: 10));
+    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller)..addListener(() {
+      setState(() {});
+    });
+    _controller.forward();
+
+    _controller.addListener(() {
+      if (_controller.isCompleted) {
+        widget.onComplete();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    var unescape = HtmlUnescape();
-    final option = question.option ?? [];
     return Container(
       margin: EdgeInsets.all(16),
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
-      ),
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(28)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 4),
           Text(
-            question.difficulty ?? "",
+            widget.difficulity,
             style: context.textTheme.bodyMedium!.copyWith(
               color: context.colorScheme.onSecondary,
               fontFamily: FontFamily.w500,
@@ -292,71 +285,86 @@ class QuestionPage extends StatelessWidget {
             child: SizedBox(
               height: 80,
               width: 80,
-              child: CountDownProgressIndicator(
-                strokeWidth: 10,
-                valueColor: Colors.pink.shade100,
-                backgroundColor: Colors.transparent,
-                initialPosition: 0,
-                duration: 10,
-                onComplete: onComplete,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation(Colors.pink.shade100),
+                      value: _animation.value,
+                      backgroundColor: Colors.grey.shade100,
+                      strokeCap: StrokeCap.round,
+                      strokeWidth: 14,
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      "${(_animation.value * 10).round()}",
+                      style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          SizedBox(height: 10),
+          SizedBox(height: 20),
           Text(
-            'Question $questionNumber of $totalQuestions',
+            'Question ${widget.questionNumber} of ${widget.totalQuestions}',
             style: context.textTheme.bodyMedium!.copyWith(
               color: context.colorScheme.onSecondary,
               fontFamily: FontFamily.w500,
             ),
           ),
-          SizedBox(height: 4),
-
+          SizedBox(height: 10),
           Text(
-            unescape.convert(question.question ?? ''),
+            HtmlUnescape().convert(widget.question.question ?? ''),
             style: context.textTheme.titleLarge,
           ),
-          SizedBox(height: 10),
+          SizedBox(height: 24),
           Expanded(
-            child: ListView.separated(
-              itemCount: option.length,
-              itemBuilder: (BuildContext context, int optionIndex) {
-                final String optionText = question.option?[optionIndex] ?? '';
-                bool isCorrect = selected == question.correctAnswer;
-                bool isSelected = selected == optionText;
+            child:
+                Wrap(
+                  runSpacing: 16,
+                  spacing: 16,
+                  children: List.generate(widget.question.option!.length, (index) {
+                    final optionText = widget.question.option![index];
+                    bool isCorrect = selected == widget.question.correctAnswer;
+                    bool isSelected = selected == optionText;
 
-                return InkWell(
-                  onTap: () {
-                    onTap!(optionText);
-                  },
-                  child: Container(
-                    margin: EdgeInsets.symmetric(vertical: 8),
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    decoration: BoxDecoration(
-                      color:
-                          isSelected
-                              ? (isCorrect ? Colors.green : Colors.red)
-                              : Colors.white,
-
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: Text(
-                      unescape.convert(optionText),
-                      style:
-                          isSelected
-                              ? context.textTheme.bodyLarge!.copyWith(
-                                fontFamily: FontFamily.w500,
-                              )
-                              : context.textTheme.bodyLarge,
-                    ),
-                  ),
-                );
-              },
-              separatorBuilder: (BuildContext context, int index) {
-                return const SizedBox(height: 4);
-              },
-            ),
+                    return InkWell(
+                      onTap:
+                          selected != null
+                              ? null
+                              : () {
+                                widget.onTap!(optionText);
+                                setState(() {
+                                  selected = optionText;
+                                });
+                                _controller.stop();
+                              },
+                      child: Container(
+                        width: double.infinity,
+                        margin: EdgeInsets.symmetric(vertical: 8),
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        decoration: BoxDecoration(
+                          color:
+                              isSelected ? (isCorrect ? Colors.green : Colors.red) : Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: Text(
+                          HtmlUnescape().convert(optionText),
+                          style:
+                              isSelected
+                                  ? context.textTheme.bodyLarge!.copyWith(
+                                    fontFamily: FontFamily.w500,
+                                  )
+                                  : context.textTheme.bodyLarge,
+                        ),
+                      ),
+                    );
+                  }),
+                ).animate().move(delay: 250.ms, duration: 250.ms, curve: Curves.bounceInOut).fade(),
           ),
         ],
       ),

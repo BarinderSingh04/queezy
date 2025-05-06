@@ -8,9 +8,8 @@ import '../common/common.dart';
 
 class TokenService {
  
-
   TokenService() {
-    _dio = Dio()..options = BaseOptions(baseUrl: baseUrl);
+    _dio = Dio()..options = BaseOptions(baseUrl: apiUrl);
     _fresh = Fresh<TokenModel>(
       httpClient: _dio,
       tokenStorage: SecureTokenStorage(),
@@ -31,16 +30,18 @@ class TokenService {
   Future<TokenModel> _refreshToken(TokenModel? token, Dio httpClient) async {
     try {
       final result = await httpClient.post(
-        "users/refresh-token",
-        data: {"refresh_token": token?.refresh_token},
+        "refresh",
+        options: Options(
+          headers: {"authorization": "Bearer ${token?.refresh_token}"},
+        )
       );
-      return TokenModel.fromMap(result.data["data"]);
+      return TokenModel.fromMap(result.data);
     } catch (e) {
       rethrow;
     }
   }
 
-  clearToken() {
+  void clearToken() {
     _fresh.clearToken();
   }
 
@@ -60,6 +61,7 @@ class SecureTokenStorage implements TokenStorage<TokenModel> {
   @override
   Future<void> delete() async {
     await storage.delete(key: "token");
+    await storage.delete(key: "refresh_token");
   }
 
   @override

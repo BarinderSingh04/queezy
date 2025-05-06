@@ -1,37 +1,20 @@
 import 'package:queezy/screens/models/room_model.dart';
 
-class Queezy {
+class GameSession {
   int? sessionId;
   List<Questions>? questions;
   List<Player>? players;
 
-  Queezy({this.sessionId, this.questions, this.players});
+  GameSession({this.sessionId, this.questions, this.players});
 
-  Queezy.fromJson(Map<String, dynamic> json) {
+  GameSession.fromJson(Map<String, dynamic> json) {
     sessionId = json['sessionId'];
     if (json['questions'] != null) {
-      questions =
-          (json['questions'] as List)
-              .map((q) => Questions.fromJson(q))
-              .toList();
+      questions = (json['questions'] as List).map((q) => Questions.fromJson(q)).toList();
     }
     if (json['players'] != null) {
-      players =
-          (json['players'] as List).map((p) => Player.fromJson(p)).toList();
+      players = (json['players'] as List).map((p) => Player.fromJson(p)).toList();
     }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = {};
-
-    data['sessionId'] = sessionId;
-    if (questions != null) {
-      data['questions'] = questions!.map((q) => q.toJson()).toList();
-    }
-    if (players != null) {
-      data['players'] = players!.map((p) => p.toJson()).toList();
-    }
-    return data;
   }
 }
 

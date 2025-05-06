@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-String baseUrl = "http://192.168.1.8:3001/";
+String baseUrl = "http://192.168.1.29:3001/";
 String apiUrl = "$baseUrl/api/";
 
 abstract class FontFamily {
@@ -13,4 +13,10 @@ abstract class FontFamily {
 extension ThemeGetter on BuildContext {
   TextTheme get textTheme => Theme.of(this).textTheme;
   ColorScheme get colorScheme => Theme.of(this).colorScheme;
+}
+
+extension StringExtension on String {
+    String capitalize() {
+      return "${this[0].toUpperCase()}${this.substring(1).toLowerCase()}";
+    }
 }

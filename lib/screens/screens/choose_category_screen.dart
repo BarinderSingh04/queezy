@@ -14,7 +14,7 @@ class ChooseCategoryScreen extends StatefulWidget {
 }
 
 class _ChooseCategoryScreenState extends State<ChooseCategoryScreen> {
-  Map<String, dynamic>? selectedCategory;
+  int? selectedCategoryId;
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +22,9 @@ class _ChooseCategoryScreenState extends State<ChooseCategoryScreen> {
       appBar: AppBar(
         title: Text(
           "Choose Category",
-          style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-            color: Theme.of(context).colorScheme.onPrimary,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall!.copyWith(color: Theme.of(context).colorScheme.onPrimary),
         ),
         centerTitle: true,
       ),
@@ -50,13 +50,10 @@ class _ChooseCategoryScreenState extends State<ChooseCategoryScreen> {
                           Expanded(
                             child: CategoryGridView(
                               content: content,
-                              selectedCategory: selectedCategory,
-                              onSelect: (item) {
+                              isSelected: (id) => selectedCategoryId == id,
+                              onSelect: (id) {
                                 setState(() {
-                                  selectedCategory = item;
-                                  print(
-                                    "Selected Category: $selectedCategory",
-                                  );
+                                  selectedCategoryId = id;
                                 });
                               },
                             ),
@@ -64,36 +61,28 @@ class _ChooseCategoryScreenState extends State<ChooseCategoryScreen> {
                           const SizedBox(height: 10),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.secondary,
-                              fixedSize: Size(
-                                MediaQuery.of(context).size.width,
-                                50,
-                              ),
+                              backgroundColor: Theme.of(context).colorScheme.secondary,
+                              fixedSize: Size(MediaQuery.of(context).size.width, 50),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
                             ),
                             onPressed: () {
-                              if (selectedCategory != null) {
+                              if (selectedCategoryId != null) {
                                 Navigator.pushNamed(
                                   context,
                                   NavRoute.chooseType.path,
-                                  arguments: selectedCategory,
+                                  arguments: selectedCategoryId,
                                 );
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text("Please select a category!"),
-                                  ),
+                                  SnackBar(content: Text("Please select a category!")),
                                 );
                               }
                             },
                             child: Text(
                               "Next",
-                              style: Theme.of(
-                                context,
-                              ).textTheme.bodyLarge!.copyWith(
+                              style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                                 color: Theme.of(context).colorScheme.onPrimary,
                               ),
                             ),
@@ -115,24 +104,22 @@ class _ChooseCategoryScreenState extends State<ChooseCategoryScreen> {
 
 class CategoryGridView extends StatelessWidget {
   final List<Map<String, dynamic>> content;
-  final Map<String, dynamic>? selectedCategory;
-  final Function(Map<String, dynamic>) onSelect;
-  final ScrollPhysics? physics;
+  final Function(int id) onSelect;
+  final bool Function(int id) isSelected;
   final List<Color>? colors;
+
   CategoryGridView({
     Key? key,
     required this.content,
-    required this.selectedCategory,
     required this.onSelect,
-    this.physics,
     this.colors,
+    required this.isSelected,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final color = colors ?? [];
     return GridView.builder(
-      physics: physics,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 0,
@@ -142,19 +129,18 @@ class CategoryGridView extends StatelessWidget {
       itemCount: content.length,
       itemBuilder: (context, index) {
         final item = content[index];
-        bool isSelected = selectedCategory == item;
 
         return Padding(
           padding: const EdgeInsets.all(12),
           child: InkWell(
-            onTap: () => onSelect(item),
+            onTap: () => onSelect(item["id"]),
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 color:
                     color.isEmpty
-                        ? isSelected
-                            ? Theme.of(context).colorScheme.onTertiary
+                        ? isSelected(item["id"])
+                            ? Theme.of(context).colorScheme.secondary
                             : Theme.of(context).colorScheme.tertiary
                         : colors?[index],
               ),
@@ -167,7 +153,7 @@ class CategoryGridView extends StatelessWidget {
                       color: context.colorScheme.onPrimary,
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(4.0),
+                      padding: const EdgeInsets.all(12.0),
                       child: Image.asset(item["image"], height: 40, width: 40),
                     ),
                   ),
@@ -181,7 +167,7 @@ class CategoryGridView extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                         color:
                             color.isEmpty
-                                ? isSelected
+                                ? isSelected(item["id"])
                                     ? Theme.of(context).colorScheme.onPrimary
                                     : Theme.of(context).colorScheme.secondary
                                 : Colors.white,

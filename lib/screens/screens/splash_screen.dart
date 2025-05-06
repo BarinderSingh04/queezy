@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:queezy/routes/routes.dart';
 
 import '../../di/service_locator.dart';
-import '../../service/local_storage_service.dart';
 import '../../service/token_service.dart';
 
 class SplashScreen extends StatefulWidget {

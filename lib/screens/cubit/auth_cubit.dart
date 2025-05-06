@@ -11,7 +11,6 @@ class AuthCubit extends Cubit<Result<AuthModel>> {
 
   Future<void> signup() async {
     emit(Result(isLoading: true));
-
     try {
       final signup = await _authService.signup(
         name: _formData['name'],

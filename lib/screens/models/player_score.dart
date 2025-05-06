@@ -1,47 +1,66 @@
-
-
-import 'package:queezy/screens/models/room_model.dart';
-
-class PlayerScore extends Player {
-  final num? total;
-  final String? correct;
-  final String? incorrect;
-  final String? skipped;
-  final num? accuracy;
+class PlayerScore {
+  int? playerId;
+  String? name;
+  String? avatar;
+  int? total;
+  String? correct;
+  String? incorrect;
+  String? skipped;
+  num? accuracy;
+  List<Attemps>? attemps;
 
   PlayerScore({
+    this.playerId,
+    this.name,
+    this.avatar,
     this.total,
     this.correct,
     this.incorrect,
     this.skipped,
-    this.accuracy,
-    super.avatar,
-    super.isHost,
-    super.name,
-    super.playerId,
+    this.attemps,
   });
 
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'total': total,
-      'correct': correct,
-      'incorrect': incorrect,
-      'skipped': skipped,
-      'accuracy': accuracy,
-    };
+  PlayerScore.fromJson(Map<String, dynamic> json) {
+    playerId = json['playerId'];
+    name = json['name'];
+    avatar = json['avatar'];
+    total = json['total'];
+    correct = json['correct'];
+    incorrect = json['incorrect'];
+    skipped = json['skipped'];
+    accuracy = json["accuracy"];
+    if (json['attemps'] != null) {
+      attemps = <Attemps>[];
+      json['attemps'].forEach((v) {
+        attemps!.add(new Attemps.fromJson(v));
+      });
+    }
   }
+}
 
-  factory PlayerScore.fromMap(Map<String, dynamic> map) {
-    return PlayerScore(
-      total: map['total'] != null ? map['total'] as num : null,
-      correct: map['correct'] != null ? map['correct'] as String : null,
-      incorrect: map['incorrect'] != null ? map['incorrect'] as String : null,
-      skipped: map['skipped'] != null ? map['skipped'] as String : null,
-      accuracy: map['accuracy'] != null ? map['accuracy'] as num : null,
-      playerId: map['playerId'],
-      name: map['name'],
-      avatar: map['avatar'],
-      isHost: map['isHost'],
-    );
+class Attemps {
+  int? playerId;
+  String? questionText;
+  String? selectedAnswer;
+  int? correct;
+  int? skipped;
+  int? incorrect;
+
+  Attemps({
+    this.playerId,
+    this.questionText,
+    this.selectedAnswer,
+    this.correct,
+    this.skipped,
+    this.incorrect,
+  });
+
+  Attemps.fromJson(Map<String, dynamic> json) {
+    playerId = json['playerId'];
+    questionText = json['questionText'];
+    selectedAnswer = json['selectedAnswer'];
+    correct = json['correct'];
+    skipped = json['skipped'];
+    incorrect = json['incorrect'];
   }
 }

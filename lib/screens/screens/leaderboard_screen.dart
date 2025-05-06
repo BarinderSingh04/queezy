@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:queezy/common/common.dart';
+import 'package:queezy/di/service_locator.dart';
+import 'package:queezy/model/result.dart';
+
+import '../cubit/leaderboard_cubit.dart';
+import '../models/room_model.dart';
 
 class LeaderBoardScreen extends StatefulWidget {
   const LeaderBoardScreen({super.key});
@@ -11,58 +17,72 @@ class LeaderBoardScreen extends StatefulWidget {
 class _LeaderBoardScreenState extends State<LeaderBoardScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Leaderboard",
-          style: context.textTheme.headlineMedium!.copyWith(
-            fontFamily: FontFamily.w500,
-            color: context.colorScheme.onPrimary,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Row(children: []),
-              Image.asset("assets/images/Slice 1.png"),
-              Container(
-                color: Color(0xffEFEEFC),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: SizedBox(
-                    height: 700,
-                    child: ListView.separated(
-                      physics: NeverScrollableScrollPhysics(),
-                      itemCount: 10,
-                      itemBuilder: (context, index) {
-                        return PlayerCard(index: index);
-                      },
-                      separatorBuilder: (BuildContext context, int index) {
-                        return SizedBox(height: 10);
-                      },
-                    ),
-                  ),
+    return BlocProvider(
+      create: (context) => getIt<LeaderBoardCubit>()..fetch(),
+      child: Builder(
+        builder: (context) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(
+                "Leaderboard",
+                style: context.textTheme.headlineMedium!.copyWith(
+                  fontFamily: FontFamily.w500,
+                  color: context.colorScheme.onPrimary,
                 ),
               ),
-            ],
-          ),
-        ),
+              centerTitle: true,
+            ),
+            body: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: BlocBuilder<LeaderBoardCubit, Result<List<LeaderBoardModel>>>(
+                builder: (context, state) {
+                  return state.when(
+                    onData: (data) {
+                      return Column(
+                        children: [
+                          Image.asset("assets/images/Slice 1.png"),
+                          Expanded(
+                            child: Container(
+                              color: Color(0xffEFEEFC),
+                              child: ListView.separated(
+                                padding: const EdgeInsets.only(left: 16, right: 16, bottom: 30),
+                                itemCount: data!.length,
+                                itemBuilder: (context, index) {
+                                  return PlayerCard(index: index, leaderBoardModel: data[index]);
+                                },
+                                separatorBuilder: (BuildContext context, int index) {
+                                  return SizedBox(height: 10);
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                    onLoading: () {
+                      return Center(child: CircularProgressIndicator());
+                    },
+                    onError: (e) {
+                      return Center(child: Text(e.toString()));
+                    },
+                  );
+                },
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 }
 
 class PlayerCard extends StatelessWidget {
-  const PlayerCard({super.key, this.index});
+  final LeaderBoardModel leaderBoardModel;
+  const PlayerCard({super.key, this.index, required this.leaderBoardModel});
   final int? index;
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 92,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: context.colorScheme.onPrimary,
@@ -72,38 +92,34 @@ class PlayerCard extends StatelessWidget {
         child: Row(
           children: [
             Container(
+              padding: EdgeInsets.all(6),
               decoration: BoxDecoration(
                 border: Border.all(color: Color(0xffE6E6E6)),
-                borderRadius: BorderRadius.circular(20),
+                shape: BoxShape.circle,
               ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-                child: Text(
-                  "1",
-                  style: context.textTheme.bodySmall!.copyWith(
-                    color: Color(0xff858494),
-                    fontFamily: FontFamily.w500,
-                  ),
+              child: Text(
+                "${index! + 1}",
+                style: context.textTheme.bodySmall!.copyWith(
+                  color: Color(0xff858494),
+                  fontFamily: FontFamily.w500,
                 ),
               ),
             ),
-            const SizedBox(width: 16),
-            Image.asset("assets/images/avatar12.png"),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
+            SizedBox.square(dimension: 50, child: Image.network(leaderBoardModel.avatarUrl)),
+            const SizedBox(width: 8),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 8,
+                spacing: 4,
                 children: [
                   Text(
-                    "Davis Cutris",
-                    style: context.textTheme.bodyLarge!.copyWith(
-                      fontFamily: FontFamily.w500,
-                    ),
+                    leaderBoardModel.name ?? "",
+                    style: context.textTheme.bodyLarge!.copyWith(fontFamily: FontFamily.w500),
                   ),
                   Text(
-                    "2,569 points",
+                    "${leaderBoardModel.totalScore!.toInt() * 10} points",
                     style: context.textTheme.bodyMedium!.copyWith(
                       fontFamily: FontFamily.w400,
                       color: Color(0xff858494),

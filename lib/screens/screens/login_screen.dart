@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:queezy/common/common.dart';
-import 'package:queezy/di/service_locator.dart';
 import 'package:queezy/model/result.dart';
 import 'package:queezy/routes/routes.dart';
 import 'package:queezy/screens/cubit/auth_cubit.dart';
@@ -18,7 +17,9 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final loginkey = GlobalKey<FormState>();
   final passKey = GlobalKey<FormFieldState>();
+
   bool passwordVisible = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,9 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
         backgroundColor: context.colorScheme.tertiary,
         title: Text(
           "Login",
-          style: context.textTheme.headlineMedium!.copyWith(
-            fontFamily: FontFamily.w500,
-          ),
+          style: context.textTheme.headlineMedium!.copyWith(fontFamily: FontFamily.w500),
         ),
         centerTitle: true,
       ),
@@ -49,9 +48,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   ).showSnackBar(SnackBar(content: Text("Login successfull!")));
                 }
                 if (state.error != null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.error.toString())),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(state.error.toString())));
                 }
               },
               builder: (context, state) {
@@ -67,12 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Row(
                         spacing: 10,
                         children: [
-                          Expanded(
-                            child: Container(
-                              color: Color(0xffE6E6E6),
-                              height: 2,
-                            ),
-                          ),
+                          Expanded(child: Container(color: Color(0xffE6E6E6), height: 2)),
 
                           Text(
                             'OR',
@@ -80,22 +74,14 @@ class _LoginScreenState extends State<LoginScreen> {
                               color: context.colorScheme.onSecondary,
                             ),
                           ),
-                          Expanded(
-                            child: Container(
-                              color: Color(0xffE6E6E6),
-                              height: 2,
-                            ),
-                          ),
+                          Expanded(child: Container(color: Color(0xffE6E6E6), height: 2)),
                         ],
                       ),
                       const SizedBox(height: 20),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "Email Address",
-                            style: context.textTheme.bodyMedium,
-                          ),
+                          Text("Email Address", style: context.textTheme.bodyMedium),
                           const SizedBox(height: 16),
                           TextFormField(
                             validator: (value) {
@@ -108,30 +94,15 @@ class _LoginScreenState extends State<LoginScreen> {
                               return null;
                             },
                             onSaved: (value) {
-                              context.read<AuthCubit>().updateForm(
-                                "email",
-                                value,
-                              );
+                              context.read<AuthCubit>().updateForm("email", value);
                             },
                             textInputAction: TextInputAction.next,
                             decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(24),
-                                borderSide: BorderSide.none,
-                              ),
-                              filled: true,
-                              fillColor: context.colorScheme.onPrimary,
                               prefixIcon: Icon(
                                 Icons.email_outlined,
                                 color: context.colorScheme.secondary,
                               ),
                               hintText: "Your email address",
-                              hintStyle: Theme.of(
-                                context,
-                              ).textTheme.titleSmall!.copyWith(
-                                color: Colors.grey,
-                                fontFamily: FontFamily.w400,
-                              ),
                             ),
                           ),
                           const SizedBox(height: 26),
@@ -148,31 +119,16 @@ class _LoginScreenState extends State<LoginScreen> {
                               return null;
                             },
                             onSaved: (value) {
-                              context.read<AuthCubit>().updateForm(
-                                "password",
-                                value,
-                              );
+                              context.read<AuthCubit>().updateForm("password", value);
                             },
                             obscureText: !passwordVisible,
                             textInputAction: TextInputAction.done,
                             decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(24),
-                                borderSide: BorderSide.none,
-                              ),
-                              filled: true,
-                              fillColor: context.colorScheme.onPrimary,
                               prefixIcon: Icon(
                                 Icons.lock_outline,
                                 color: context.colorScheme.secondary,
                               ),
                               hintText: "Enter password",
-                              hintStyle: Theme.of(
-                                context,
-                              ).textTheme.titleSmall!.copyWith(
-                                color: Colors.grey,
-                                fontFamily: FontFamily.w400,
-                              ),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   passwordVisible
@@ -196,6 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 24),
                           PrimaryButton(
+                            isLoading: context.watch<AuthCubit>().state.isLoading,
                             onPressed: () {
                               if (loginkey.currentState!.validate()) {
                                 loginkey.currentState?.save();
@@ -208,10 +165,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Center(
                             child: PlainTextButton(
                               onPressed: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  NavRoute.resetPassword.path,
-                                );
+                                Navigator.pushNamed(context, NavRoute.resetPassword.path);
                               },
                               label: 'Forget Password?',
                               color: context.colorScheme.secondary,
@@ -225,9 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         textAlign: TextAlign.center,
                         text: TextSpan(
                           text: "By continuing, you agree to the ",
-                          style: context.textTheme.bodyMedium!.copyWith(
-                            color: Colors.grey,
-                          ),
+                          style: context.textTheme.bodyMedium!.copyWith(color: Colors.grey),
                           children: [
                             TextSpan(
                               text: 'Terms of Services',
@@ -237,9 +189,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             TextSpan(
                               text: ' & ',
-                              style: context.textTheme.bodyMedium!.copyWith(
-                                color: Colors.grey,
-                              ),
+                              style: context.textTheme.bodyMedium!.copyWith(color: Colors.grey),
                             ),
                             TextSpan(
                               text: 'Privacy Policy.',

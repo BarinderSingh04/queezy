@@ -1,8 +1,10 @@
+import 'package:queezy/common/common.dart';
+
 class AuthModel {
   int? success;
   String? token;
   String? refreshToken;
-  Data? data;
+  User? data;
 
   AuthModel({this.success, this.token, this.refreshToken, this.data});
 
@@ -10,7 +12,7 @@ class AuthModel {
     success = json['success'];
     token = json['token'];
     refreshToken = json['refresh_token'];
-    data = json['data'] != null ? new Data.fromJson(json['data']) : null;
+    data = json['data'] != null ? new User.fromJson(json['data']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -25,16 +27,18 @@ class AuthModel {
   }
 }
 
-class Data {
+class User {
   int? id;
   String? name;
   String? email;
   String? avatar;
   String? createdAt;
 
-  Data({this.id, this.name, this.email, this.avatar, this.createdAt});
+  User({this.id, this.name, this.email, this.avatar, this.createdAt});
 
-  Data.fromJson(Map<String, dynamic> json) {
+  String get avatarPath => "$baseUrl$avatar";
+
+  User.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
     email = json['email'];
