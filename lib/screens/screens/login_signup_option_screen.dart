@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:queezy/common/common.dart';
 import 'package:queezy/routes/routes.dart';
 import 'package:queezy/widgets/buttons_widget.dart';
@@ -7,8 +8,7 @@ class LoginSignupOptionScreen extends StatefulWidget {
   const LoginSignupOptionScreen({super.key});
 
   @override
-  State<LoginSignupOptionScreen> createState() =>
-      _LoginSignupOptionScreenState();
+  State<LoginSignupOptionScreen> createState() => _LoginSignupOptionScreenState();
 }
 
 class _LoginSignupOptionScreenState extends State<LoginSignupOptionScreen> {
@@ -22,20 +22,16 @@ class _LoginSignupOptionScreenState extends State<LoginSignupOptionScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.only(top: 40.0),
-              child: Center(
-                child: Image.asset("assets/images/logo.png", height: 80),
-              ),
+              child: Center(child: Image.asset("assets/images/logo.png", height: 80)),
             ),
             const SizedBox(height: 20),
             Text(
               "Queezy",
-              style: context.textTheme.titleLarge!.copyWith(
-                color: context.colorScheme.onPrimary,
-              ),
+              style: context.textTheme.titleLarge!.copyWith(color: context.colorScheme.onPrimary),
             ),
             const SizedBox(height: 10),
             Image.asset("assets/images/optionIllustration.png"),
-            const SizedBox(height: 10),
+            Spacer(),
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
@@ -62,24 +58,16 @@ class _LoginSignupOptionScreenState extends State<LoginSignupOptionScreen> {
                     const SizedBox(height: 20),
                     PrimaryButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, NavRoute.login.path);
+                        context.push(NavRoute.login.path);
                       },
                       label: "Login",
                     ),
                     const SizedBox(height: 20),
                     LightPrimaryButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, NavRoute.signup.path);
+                        context.push(NavRoute.signup.path);
                       },
                       label: "Create an account",
-                    ),
-                    const SizedBox(height: 10),
-                    PlainTextButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, NavRoute.bottomNav.path);
-                      },
-                      label: "Later",
-                      color: context.colorScheme.onSecondary,
                     ),
                   ],
                 ),

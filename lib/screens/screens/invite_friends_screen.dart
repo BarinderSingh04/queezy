@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:queezy/common/common.dart';
 import 'package:queezy/widgets/buttons_widget.dart';
 
@@ -13,7 +14,6 @@ class InviteFriendsScreen extends StatefulWidget {
 class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
   @override
   Widget build(BuildContext context) {
-    print("code: ${widget.code}");
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -24,6 +24,12 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
           ),
         ),
         centerTitle: true,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          icon: Icon(Icons.arrow_back),
+        ),
       ),
       body: Center(
         child: Container(
@@ -53,10 +59,7 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
                     ),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 27.0,
-                      vertical: 30,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 27.0, vertical: 30),
                     child: Column(
                       spacing: 6,
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -66,7 +69,7 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
                           "Invite Friend",
                           style: context.textTheme.titleLarge!.copyWith(
                             color: context.colorScheme.onPrimary,
-                            fontFamily: FontFamily.w700
+                            fontFamily: FontFamily.w700,
                           ),
                         ),
                       ],
@@ -94,9 +97,7 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
                         Text(
                           "Invite friends and get a bonus points for every new player!",
                           textAlign: TextAlign.center,
-                          style: context.textTheme.bodyLarge!.copyWith(
-                            fontFamily: FontFamily.w500,
-                          ),
+                          style: context.textTheme.bodyLarge!.copyWith(fontFamily: FontFamily.w500),
                         ),
                         const SizedBox(height: 24),
                         Container(
@@ -111,7 +112,7 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             child: Center(
                               child: Text(
-                                widget.code ??"",
+                                widget.code ?? "",
                                 style: context.textTheme.bodyLarge!.copyWith(
                                   fontFamily: FontFamily.w700,
                                 ),
@@ -124,8 +125,17 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
                           children: [
                             Expanded(
                               child: PrimaryIconButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
+                                onPressed: () async {
+                                  try {
+                                    await Clipboard.setData(ClipboardData(text: widget.code!));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text("Code copied to clippboard.")),
+                                    );
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(
+                                      context,
+                                    ).showSnackBar(SnackBar(content: Text(e.toString())));
+                                  }
                                 },
                                 label: "Copy Code",
                                 icon: Icon(Icons.content_paste),

@@ -49,6 +49,8 @@ dependencies:
   loading_animation_widget: ^1.3.0
   fresh_dio:
   flutter_animate: ^4.5.2
+  go_router: ^15.1.1
+  expandable: ^5.0.1
 
 dev_dependencies:
   flutter_test:

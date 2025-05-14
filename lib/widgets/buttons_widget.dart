@@ -73,6 +73,43 @@ class PrimaryButton extends StatelessWidget {
   }
 }
 
+class OutlineButton extends StatelessWidget {
+  final String title;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+  const OutlineButton({super.key, required this.title, this.onPressed, this.isLoading = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        fixedSize: Size(MediaQuery.sizeOf(context).width, 50),
+        backgroundColor: context.colorScheme.onPrimary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: context.colorScheme.onSecondary),
+        ),
+      ),
+      onPressed: onPressed,
+      child:
+          isLoading
+              ? Center(
+                child: LoadingAnimationWidget.horizontalRotatingDots(
+                  color: context.colorScheme.secondary,
+                  size: 34,
+                ),
+              )
+              : Text(
+                title,
+                style: context.textTheme.bodyMedium!.copyWith(
+                  color: context.colorScheme.secondary,
+                  fontFamily: FontFamily.w500,
+                ),
+              ),
+    );
+  }
+}
+
 class RoundedIconButton extends StatelessWidget {
   final VoidCallback onPressed;
   final String label;

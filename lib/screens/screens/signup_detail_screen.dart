@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:queezy/common/common.dart';
 import 'package:queezy/model/result.dart';
-import 'package:queezy/routes/routes.dart';
 import 'package:queezy/screens/cubit/auth_cubit.dart';
 import 'package:queezy/screens/cubit/avatar_list_cubit.dart';
-import 'package:queezy/screens/models/auth_model.dart';
 import 'package:queezy/screens/models/avatar_model.dart';
 import 'package:queezy/widgets/buttons_widget.dart';
 
@@ -58,15 +56,9 @@ class _SignUpPageState extends State<SignUpPage> {
       body: Column(
         children: [
           Expanded(
-            child: BlocConsumer<AuthCubit, Result<AuthModel>>(
+            child: BlocConsumer<AuthCubit, AuthenticationState>(
               listener: (context, state) {
-                if (state.data != null) {
-                  Navigator.pushNamed(context, NavRoute.bottomNav.path);
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text("Signup successfull!")));
-                }
-                if (state.error != null) {
+                if (state is AuthenticationFailure) {
                   ScaffoldMessenger.of(
                     context,
                   ).showSnackBar(SnackBar(content: Text(state.error.toString())));
@@ -74,6 +66,7 @@ class _SignUpPageState extends State<SignUpPage> {
               },
               builder: (context, state) {
                 return PageView(
+                  physics: NeverScrollableScrollPhysics(),
                   controller: _controller,
                   onPageChanged: (index) {
                     setState(() => currentPage = index);
@@ -109,7 +102,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 SizedBox(height: 16),
                 PrimaryButton(
-                  isLoading: context.watch<AuthCubit>().state.isLoading,
+                  isLoading: context.watch<AuthCubit>().state is AuthenticationLoading,
                   onPressed: _nextPage,
                   label: currentPage == 2 ? 'Sign Up' : "Next",
                 ),

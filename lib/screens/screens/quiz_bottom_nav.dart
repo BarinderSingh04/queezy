@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:queezy/screens/screens/home_screen.dart';
-import 'package:queezy/screens/screens/profile_screen.dart';
-import 'package:queezy/screens/screens/quiz_category_screen.dart';
+import 'package:go_router/go_router.dart';
+import 'package:queezy/common/common.dart';
+import 'package:queezy/routes/routes.dart';
 
 import '../../di/service_locator.dart';
 import '../../service/socket_service.dart';
-import 'leaderboard_screen.dart';
 
 class QuizBottomNav extends StatefulWidget {
-  const QuizBottomNav({super.key});
+  final Widget child;
+  const QuizBottomNav({super.key, required this.child});
 
   @override
   State<QuizBottomNav> createState() => _QuizBottomNavState();
@@ -16,14 +16,6 @@ class QuizBottomNav extends StatefulWidget {
 
 class _QuizBottomNavState extends State<QuizBottomNav> {
   int _currentIndex = 0;
-
-  final List<Widget> _screens = [
-    HomeScreen(),
-    QuizCategoryScreen(),
-    Center(child: Text('Add')),
-    LeaderBoardScreen(),
-    ProfileScreen(),
-  ];
 
   @override
   void initState() {
@@ -34,7 +26,7 @@ class _QuizBottomNavState extends State<QuizBottomNav> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: widget.child,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           setState(() {
@@ -47,7 +39,9 @@ class _QuizBottomNavState extends State<QuizBottomNav> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         shape: CircularNotchedRectangle(),
-        notchMargin: 8,
+        notchMargin: 10,
+        clipBehavior: Clip.antiAlias,
+        color: context.colorScheme.tertiary,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
           child: Row(
@@ -58,12 +52,13 @@ class _QuizBottomNavState extends State<QuizBottomNav> {
                   IconButton(
                     icon: Icon(
                       Icons.home_outlined,
-                      color: _currentIndex == 0 ? Colors.black : Colors.grey,
+                      color: _currentIndex == 0 ? Colors.black : Colors.grey.shade700,
                     ),
                     onPressed: () {
                       setState(() {
                         _currentIndex = 0;
                       });
+                      _onItemTapped(0, context);
                     },
                   ),
                   const SizedBox(width: 30),
@@ -76,6 +71,7 @@ class _QuizBottomNavState extends State<QuizBottomNav> {
                       setState(() {
                         _currentIndex = 1;
                       });
+                      _onItemTapped(1, context);
                     },
                   ),
                 ],
@@ -88,6 +84,7 @@ class _QuizBottomNavState extends State<QuizBottomNav> {
                       color: _currentIndex == 3 ? Colors.black : Colors.grey,
                     ),
                     onPressed: () {
+                      _onItemTapped(3, context);
                       setState(() {
                         _currentIndex = 3;
                       });
@@ -103,6 +100,7 @@ class _QuizBottomNavState extends State<QuizBottomNav> {
                       setState(() {
                         _currentIndex = 4;
                       });
+                      _onItemTapped(4, context);
                     },
                   ),
                 ],
@@ -112,5 +110,20 @@ class _QuizBottomNavState extends State<QuizBottomNav> {
         ),
       ),
     );
+  }
+
+  void _onItemTapped(int index, BuildContext context) {
+    switch (index) {
+      case 0:
+        GoRouter.of(context).go(NavRoute.home.path);
+      case 1:
+        GoRouter.of(context).go(NavRoute.quizCategory.path);
+      case 3:
+        GoRouter.of(context).go(NavRoute.leaderboard.path);
+      case 4:
+        GoRouter.of(context).go(NavRoute.profile.path);
+      case 2:
+        GoRouter.of(context).go(NavRoute.profile.path);
+    }
   }
 }

@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:queezy/common/common.dart';
 import 'package:queezy/di/service_locator.dart';
 import 'package:queezy/model/result.dart';
 import 'package:queezy/routes/routes.dart';
+import 'package:queezy/screens/cubit/active_room_cubit.dart';
+import 'package:queezy/screens/cubit/auth_cubit.dart';
 import 'package:queezy/screens/cubit/join_room_cubit.dart';
+import 'package:queezy/screens/models/category_model.dart';
 import 'package:queezy/screens/models/room_model.dart';
-import 'package:queezy/service/local_storage_service.dart';
 import 'package:queezy/widgets/buttons_widget.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
-
-import '../models/auth_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,17 +22,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late User user;
-
-  @override
-  void initState() {
-    super.initState();
-    user = getIt<LocalStorageService>().getUser()!;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: context.colorScheme.secondary,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -40,43 +35,56 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                    BlocBuilder<AuthCubit, AuthenticationState>(
+                      builder: (context, state) {
+                        state = state as AuthenticatedState;
+                        final user = state.authModel.data;
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(Icons.wb_sunny_outlined, color: Color(0xffFFD6DD)),
-                                const SizedBox(width: 10),
+                                Row(
+                                  children: [
+                                    Icon(Icons.wb_sunny_outlined, color: Color(0xffFFD6DD)),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      "GOOD MORNING",
+                                      style: context.textTheme.bodySmall!.copyWith(
+                                        color: Color(0xffFFD6DD),
+                                        fontFamily: FontFamily.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                                 Text(
-                                  "GOOD MORNING",
-                                  style: context.textTheme.bodySmall!.copyWith(
-                                    color: Color(0xffFFD6DD),
+                                  user?.name ?? "",
+                                  style: context.textTheme.titleLarge!.copyWith(
                                     fontFamily: FontFamily.w500,
+                                    color: context.colorScheme.onPrimary,
                                   ),
                                 ),
                               ],
                             ),
-                            Text(
-                              user.name ?? "",
-                              style: context.textTheme.titleLarge!.copyWith(
-                                fontFamily: FontFamily.w500,
-                                color: context.colorScheme.onPrimary,
+                            InkWell(
+                              onTap: () {
+                                context.goNamed(NavRoute.editProfile.name);
+                              },
+                              child: SizedBox.square(
+                                dimension: 50,
+                                child: Image.network(user!.avatarPath),
                               ),
                             ),
                           ],
-                        ),
-                        SizedBox.square(dimension: 50, child: Image.network(user.avatarPath)),
-                      ],
+                        );
+                      },
                     ),
-                    const SizedBox(height: 24),
                     RecentQuizCard(),
-                    const SizedBox(height: 24),
                     Container(
                       height: 240,
                       width: MediaQuery.sizeOf(context).width,
+                      margin: EdgeInsets.only(top: 24),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         image: DecorationImage(
@@ -132,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   child: Center(
                                     child: RoundedIconButton(
                                       onPressed: () {
-                                        Navigator.pushNamed(context, NavRoute.chooseCategory.path);
+                                        context.goNamed(NavRoute.chooseCategory.path);
                                       },
                                       label: "Create Game",
                                       color: context.colorScheme.onPrimary,
@@ -178,9 +186,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             onPressed: () {
                               showModalBottomSheet(
                                 context: context,
-                                constraints: BoxConstraints(
-                                  maxHeight: MediaQuery.sizeOf(context).height / 1.7,
-                                ),
                                 isScrollControlled: true,
                                 builder: (context) {
                                   return BlocProvider(
@@ -290,125 +295,133 @@ class _JoinRoomSheetState extends State<JoinRoomSheet> {
     return BlocConsumer<JoinRoomCubit, Result<RoomModel>>(
       listener: (context, state) {
         if (state.data != null) {
-          Navigator.of(
-            context,
-          ).pushReplacementNamed(NavRoute.quizDetails.path, arguments: state.data);
+          context.pop();
+          context.goNamed(NavRoute.quizDetails.name, extra: state.data);
         }
       },
       builder: (context, state) {
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: 200,
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
-                  color: Color(0xff9087E5),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 30),
-                  child: Stack(
-                    children: [
-                      Positioned.fill(child: Image.asset("assets/images/invitebg.png")),
-                      Positioned.fill(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox.square(
-                              dimension: 70,
-                              child: Image.asset("assets/images/avatar5.png"),
+        return Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: SizedBox(
+            height: MediaQuery.sizeOf(context).height / 1.7,
+            child: Stack(
+              children: [
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    height: 200,
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        topRight: Radius.circular(20),
+                      ),
+                      color: Color(0xff9087E5),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 30),
+                      child: Stack(
+                        children: [
+                          Positioned.fill(child: Image.asset("assets/images/invitebg.png")),
+                          Positioned.fill(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox.square(
+                                  dimension: 70,
+                                  child: Image.asset("assets/images/avatar5.png"),
+                                ),
+                                Text(
+                                  "Enter Room Code",
+                                  style: context.textTheme.titleLarge!.copyWith(
+                                    color: context.colorScheme.onPrimary,
+                                    fontFamily: FontFamily.w700,
+                                  ),
+                                ),
+                              ],
                             ),
-                            Text(
-                              "Enter Room Code",
-                              style: context.textTheme.titleLarge!.copyWith(
-                                color: context.colorScheme.onPrimary,
-                                fontFamily: FontFamily.w700,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 160,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage("assets/images/Union.png"),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 34.0, vertical: 24),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Text(
+                            "Join with friends and family, compete for the victory.",
+                            textAlign: TextAlign.center,
+                            style: context.textTheme.bodyLarge!.copyWith(
+                              fontFamily: FontFamily.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          TextField(
+                            controller: _code,
+                            style: TextStyle(fontSize: 16, fontFamily: FontFamily.w700),
+                            textCapitalization: TextCapitalization.characters,
+                            maxLength: 4,
+                            decoration: InputDecoration(
+                              filled: true,
+                              counterText: "",
+                              contentPadding: EdgeInsets.all(16),
+                              fillColor: Color(0xffEFEEFC),
+                              hintText: "AB4Z",
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                borderSide: BorderSide(color: Color(0xffbfd2f2), width: 1),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                borderSide: BorderSide(color: Color(0xffbfd2f2), width: 1),
                               ),
                             ),
-                          ],
-                        ),
+                            textAlign: TextAlign.center,
+                          ),
+                          if (state.error != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text(
+                                state.error!.toString(),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(color: context.colorScheme.error),
+                              ),
+                            ),
+                          const SizedBox(height: 24),
+                          PrimaryButton(
+                            isLoading: state.isLoading,
+                            onPressed: () {
+                              if (_code.text.isNotEmpty) {
+                                context.read<JoinRoomCubit>().join(roomCode: _code.text);
+                              }
+                            },
+                            label: "Join Now",
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-            Positioned(
-              top: 160,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Container(
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage("assets/images/Union.png"),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 34.0, vertical: 24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Text(
-                        "Join with friends and family, compete for the victory.",
-                        textAlign: TextAlign.center,
-                        style: context.textTheme.bodyLarge!.copyWith(fontFamily: FontFamily.w500),
-                      ),
-                      const SizedBox(height: 24),
-                      TextField(
-                        controller: _code,
-                        style: TextStyle(fontSize: 16, fontFamily: FontFamily.w700),
-                        textCapitalization: TextCapitalization.characters,
-                        decoration: InputDecoration(
-                          filled: true,
-                          contentPadding: EdgeInsets.all(16),
-                          fillColor: Color(0xffEFEEFC),
-                          hintText: "AB4Z",
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: BorderSide(color: Color(0xffbfd2f2), width: 1),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: BorderSide(color: Color(0xffbfd2f2), width: 1),
-                          ),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      if (state.error != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Text(
-                            state.error!.toString(),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: context.colorScheme.error),
-                          ),
-                        ),
-                      const SizedBox(height: 24),
-                      PrimaryButton(
-                        isLoading: state.isLoading,
-                        onPressed: () {
-                          if (_code.text.isNotEmpty) {
-                            context.read<JoinRoomCubit>().join(roomCode: _code.text);
-                          }
-                        },
-                        label: "Join Now",
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
+          ),
         );
       },
     );
@@ -489,67 +502,87 @@ class RecentQuizCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 100,
-      decoration: BoxDecoration(color: Color(0xffffccd5), borderRadius: BorderRadius.circular(20)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "RECENT QUIZ",
-                  style: context.textTheme.bodyMedium!.copyWith(
-                    color: Color.fromARGB(176, 102, 0, 19),
-                    fontFamily: FontFamily.w700,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(Icons.headphones, color: Color(0xff660012)),
-                    const SizedBox(width: 10),
-                    Text(
-                      "A Basic Music Quiz",
-                      style: context.textTheme.bodyLarge!.copyWith(
-                        fontFamily: FontFamily.w700,
-                        color: Color(0xff660012),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+    return BlocBuilder<ActiveRoomCubit, Result<JoinRoomModel?>>(
+      builder: (context, state) {
+        return state.when(
+          onLoading: () {
+            return SizedBox.shrink();
+          },
+          onError: (e) {
+            return SizedBox.shrink();
+          },
+          onData: (data) {
+            if (data == null) {
+              return SizedBox.shrink();
+            }
 
-            SizedBox(
-              width: 80,
-              child: Center(
-                child: Stack(
+            final category = content.firstWhere((element) => element['id'] == data.categoryId);
+            return Container(
+              margin: EdgeInsets.only(top: 24),
+              decoration: BoxDecoration(
+                color: Color(0xffffccd5),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    RadialFilledTrackProgress(
-                      progress: 65,
-                      size: 180,
-                      fillGradientColors: [Color.fromARGB(255, 249, 125, 145)],
-                    ),
-                    Center(
-                      child: Text(
-                        "65%",
-                        style: context.textTheme.bodyLarge!.copyWith(
-                          fontFamily: FontFamily.w700,
-                          color: context.colorScheme.onPrimary,
-                        ),
+                    Text(
+                      "RECENT QUIZ",
+                      style: context.textTheme.bodyMedium!.copyWith(
+                        color: Color.fromARGB(176, 102, 0, 19),
+                        fontFamily: FontFamily.w700,
                       ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        SizedBox.square(
+                          dimension: 35,
+                          child: Image.asset(category["image"], color: Color(0xff660012)),
+                        ),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              category["category"],
+                              style: context.textTheme.bodyLarge!.copyWith(
+                                fontFamily: FontFamily.w700,
+                                fontSize: 16,
+                                color: Color(0xff660012),
+                              ),
+                            ),
+                            Text(
+                              data.difficulty?.capitalize() ?? "",
+                              style: context.textTheme.bodyLarge!.copyWith(
+                                color: Color(0xff660012),
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Spacer(),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            elevation: 0,
+                            backgroundColor: Color.fromARGB(176, 102, 0, 19),
+                          ),
+                          onPressed: () {
+                            context.goNamed(NavRoute.quizDetails.name, extra: data);
+                          },
+                          child: Text("Continue"),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
+            ).animate().fade();
+          },
+        );
+      },
     );
   }
 }

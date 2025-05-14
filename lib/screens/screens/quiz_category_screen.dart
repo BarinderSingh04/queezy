@@ -14,6 +14,7 @@ class _QuizCategoryScreenState extends State<QuizCategoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: context.colorScheme.secondary,
       appBar: AppBar(
         title: Text(
           "Discover",
@@ -36,13 +37,9 @@ class _QuizCategoryScreenState extends State<QuizCategoryScreen> {
                       Navigator.pushNamed(context, NavRoute.search.path);
                     },
                     decoration: InputDecoration(
-                      
                       filled: true,
                       fillColor: Color(0xff5b4dc3),
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: context.colorScheme.onPrimary,
-                      ),
+                      prefixIcon: Icon(Icons.search, color: context.colorScheme.onPrimary),
                       hintText: "Quiz, categories, or friends",
                       hintStyle: context.textTheme.bodyMedium!.copyWith(
                         color: context.colorScheme.onPrimary,
@@ -75,9 +72,7 @@ class _QuizCategoryScreenState extends State<QuizCategoryScreen> {
                   children: [
                     Text(
                       "Top rank of the week",
-                      style: context.textTheme.titleLarge!.copyWith(
-                        fontFamily: FontFamily.w500,
-                      ),
+                      style: context.textTheme.titleLarge!.copyWith(fontFamily: FontFamily.w500),
                     ),
                     const SizedBox(height: 10),
                     Stack(
@@ -110,11 +105,9 @@ class _QuizCategoryScreenState extends State<QuizCategoryScreen> {
                                       ),
                                       child: Text(
                                         "1",
-                                        style: context.textTheme.bodySmall!
-                                            .copyWith(
-                                              color:
-                                                  context.colorScheme.onPrimary,
-                                            ),
+                                        style: context.textTheme.bodySmall!.copyWith(
+                                          color: context.colorScheme.onPrimary,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -127,35 +120,28 @@ class _QuizCategoryScreenState extends State<QuizCategoryScreen> {
                                         height: 100,
                                         child: Align(
                                           alignment: Alignment.bottomRight,
-                                          child: Image.asset(
-                                            "assets/images/czech_republic.png",
-                                          ),
+                                          child: Image.asset("assets/images/czech_republic.png"),
                                         ),
                                       ),
                                     ],
                                   ),
                                   const SizedBox(width: 20),
                                   Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         "Bradon Matrovs",
-                                        style: context.textTheme.bodyLarge!
-                                            .copyWith(
-                                              color:
-                                                  context.colorScheme.onPrimary,
-                                              fontFamily: FontFamily.w500,
-                                            ),
+                                        style: context.textTheme.bodyLarge!.copyWith(
+                                          color: context.colorScheme.onPrimary,
+                                          fontFamily: FontFamily.w500,
+                                        ),
                                       ),
                                       Text(
                                         "124 points",
-                                        style: context.textTheme.bodyMedium!
-                                            .copyWith(
-                                              fontFamily: FontFamily.w400,
-                                              color:
-                                                  context.colorScheme.onPrimary,
-                                            ),
+                                        style: context.textTheme.bodyMedium!.copyWith(
+                                          fontFamily: FontFamily.w400,
+                                          color: context.colorScheme.onPrimary,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -178,12 +164,9 @@ class _QuizCategoryScreenState extends State<QuizCategoryScreen> {
                     const SizedBox(height: 20),
                     Text(
                       "Categories",
-                      style: context.textTheme.titleLarge!.copyWith(
-                        fontFamily: FontFamily.w500,
-                      ),
+                      style: context.textTheme.titleLarge!.copyWith(fontFamily: FontFamily.w500),
                     ),
                     const SizedBox(height: 10),
-                    
                   ],
                 ),
               ),
@@ -223,10 +206,7 @@ class TopPicksCard extends StatelessWidget {
                 color: Color(0xffff8fa2),
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 child: Text(
                   "TOP PICKS",
                   style: context.textTheme.bodySmall!.copyWith(

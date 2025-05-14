@@ -1,9 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
-
+import 'package:go_router/go_router.dart';
 import 'package:queezy/common/common.dart';
 import 'package:queezy/routes/routes.dart';
-
 import '../models/category_model.dart';
 
 class ChooseCategoryScreen extends StatefulWidget {
@@ -20,12 +19,7 @@ class _ChooseCategoryScreenState extends State<ChooseCategoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Choose Category",
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall!.copyWith(color: Theme.of(context).colorScheme.onPrimary),
-        ),
+        title: Text("Choose Category", style: TextStyle(color: Colors.white)),
         centerTitle: true,
       ),
       body: Container(
@@ -69,10 +63,11 @@ class _ChooseCategoryScreenState extends State<ChooseCategoryScreen> {
                             ),
                             onPressed: () {
                               if (selectedCategoryId != null) {
-                                Navigator.pushNamed(
-                                  context,
-                                  NavRoute.chooseType.path,
-                                  arguments: selectedCategoryId,
+                                context.push(
+                                  context.namedLocation(
+                                    NavRoute.chooseType.name,
+                                    pathParameters: {'categoryId': selectedCategoryId.toString()},
+                                  ),
                                 );
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(

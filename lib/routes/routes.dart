@@ -18,16 +18,22 @@ enum NavRoute {
   quizScreen,
   resultScreen,
   reviewQuiz,
-  profile
+  profile,
+  editProfile,
+  leaderboard
 }
 
 extension NavRouteExtension on NavRoute {
+  String get name {
+    return toString().split('.').last;
+  }
+
   String get path {
     switch (this) {
       case NavRoute.splash:
         return "/";
       case NavRoute.onBoarding:
-        return "onBoarding";
+        return "/onBoarding";
       case NavRoute.loginSignupOption:
         return "/loginSignupOption";
       case NavRoute.signup:
@@ -47,23 +53,27 @@ extension NavRouteExtension on NavRoute {
       case NavRoute.quizCategory:
         return "/quizCategory";
       case NavRoute.inviteFriend:
-        return "/inviteFriend";
+        return "inviteFriend/:code";
       case NavRoute.search:
         return "/search";
       case NavRoute.chooseCategory:
-        return "/chooseCategory";
+        return "chooseCategory";
       case NavRoute.chooseType:
-        return "/chooseType";
+        return "chooseType/:categoryId";
       case NavRoute.quizDetails:
-        return "/quizDetails";
+        return "quizDetails";
       case NavRoute.quizScreen:
-        return "/quizScreen";
+        return "quizScreen";
       case NavRoute.resultScreen:
-        return "/resultScreen";
+        return "resultScreen:sessionId";
       case NavRoute.reviewQuiz:
-        return "/reviewQuiz";
+        return "reviewQuiz:sessionId/player/:playerId";
       case NavRoute.profile:
         return "/profile";
+      case NavRoute.editProfile:
+        return "/editProfile";
+      case NavRoute.leaderboard:
+        return "/leaderboard";
     }
   }
 }

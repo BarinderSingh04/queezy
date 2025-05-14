@@ -14,8 +14,8 @@ class AppTheme {
       // outline: Color(0xff333333),
     ),
     brightness: Brightness.light,
-    scaffoldBackgroundColor: Color(0xff6A5AE0),
     textTheme: textTheme.apply(displayColor: Colors.black, bodyColor: Colors.black),
+    
     primaryColor: Colors.black,
     useMaterial3: true,
     fontFamily: "Mont_Blanc_Regular",

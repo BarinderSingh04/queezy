@@ -1,403 +1,291 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:queezy/common/common.dart';
-import 'package:queezy/routes/routes.dart';
-import 'package:queezy/screens/cubit/quiz_logic_cubit.dart';
-import 'package:queezy/screens/models/quiz_result.dart';
-import 'package:queezy/screens/widget/animateion_widget.dart';
+import 'package:queezy/model/result.dart';
+import 'package:queezy/screens/cubit/game_details_cubit.dart';
+import 'package:queezy/screens/models/category_model.dart';
+import 'package:queezy/screens/models/room_model.dart';
 
-import '../../di/service_locator.dart';
-
-class ReviewQuizScreen extends StatefulWidget {
-  const ReviewQuizScreen({super.key});
+class ReviewScreen extends StatefulWidget {
+  final int? sessionId;
+  const ReviewScreen({super.key, this.sessionId});
 
   @override
-  State<ReviewQuizScreen> createState() => _ReviewQuizScreenState();
+  State<ReviewScreen> createState() => _ReviewScreenState();
 }
 
-class _ReviewQuizScreenState extends State<ReviewQuizScreen> {
-  var unescape = HtmlUnescape();
-  
-  @override
-  void dispose() {
-    getIt.resetLazySingleton<QuizLogicCubit>();
-    super.dispose();
-  }
+class _ReviewScreenState extends State<ReviewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocBuilder<QuizLogicCubit, QuizResult>(
-        builder: (context, result) {
-          return SingleChildScrollView(
-            child: Container(
-              color: context.colorScheme.onPrimary,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 30,
-                  horizontal: 20,
-                ),
+      backgroundColor: Colors.white,
+      body: BlocBuilder<GameDetailsCubit, Result<GameDetail>>(
+        builder: (context, state) {
+          return state.when(
+            onLoading: () {
+              return Center(child: CircularProgressIndicator());
+            },
+            onError: (error) {
+              return Center(child: Text(error.toString()));
+            },
+            onData: (data) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: Center(
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 20.0),
+                    SafeArea(
+                      bottom: false,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: Center(
                               child: Text(
-                                "Review Answere!",
-                                style: context.textTheme.headlineSmall!
-                                    .copyWith(fontFamily: FontFamily.w500),
+                                "Review Answers",
+                                style: context.textTheme.headlineSmall!.copyWith(
+                                  fontFamily: FontFamily.w500,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        InkWell(
-                          onTap: () {
-                            Navigator.of(context).pushNamedAndRemoveUntil(
-                              NavRoute.chooseCategory.path,
-                              (route) => true,
-                            );
-                          },
-                          child: Icon(Icons.close),
-                        ),
-                      ],
+                          InkWell(
+                            onTap: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Icon(Icons.close),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 40),
-                    Center(
+                    SizedBox(height: 24),
+                    AspectRatio(
+                      aspectRatio: 1.5,
                       child: Container(
-                        width: MediaQuery.sizeOf(context).width,
-                        height: 248,
+                        padding: EdgeInsets.only(left: 16, right: 16, top: 16),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
-                          color: context.colorScheme.secondary,
+                          color: Color(0xff6A5AE0),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(top: 24),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "${result.category}",
-                                          style: context.textTheme.bodyMedium!
-                                              .copyWith(
-                                                color: Colors.grey.shade400,
-                                                fontFamily: FontFamily.w500,
-                                              ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          "English Premier League Quiz",
-                                          style: context.textTheme.bodyLarge!
-                                              .copyWith(
-                                                color:
-                                                    context
-                                                        .colorScheme
-                                                        .onPrimary,
-                                                fontFamily: FontFamily.w500,
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                    Container(
-                                      height: 48,
-                                      width: 48,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        color: Colors.white30,
-                                      ),
-                                      child: Icon(
-                                        Icons.extension_outlined,
-                                        color: context.colorScheme.onPrimary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              Spacer(),
-                              Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(20),
-                                    topRight: Radius.circular(20),
-                                  ),
-                                  color: context.colorScheme.onTertiary,
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(24.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment
-                                            .center, // Centers the children in the Row
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment
-                                            .center, // Ensures vertical alignment
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Stack(
-                                        alignment:
-                                            Alignment
-                                                .center, // Aligns all Stack children at the center
-                                        children: [
-                                          SizedBox(
-                                            height: 100,
-                                            width: 100,
-                                            child: AnimatedCircularProgress(
-                                              value: result.correctAnswere / 10,
-                                            ),
-                                          ),
-                                          Row(
-                                            children: [
-                                              AnimatedScore(
-                                                score: result.correctAnswere,
-                                                style: context
-                                                    .textTheme
-                                                    .headlineSmall!
-                                                    .copyWith(
-                                                      color:
-                                                          context
-                                                              .colorScheme
-                                                              .onPrimary,
-                                                      fontFamily:
-                                                          FontFamily.w500,
-                                                    ),
-                                              ),
-                                              Text(
-                                                '/ ${result.answere.length}',
-                                                style: context
-                                                    .textTheme
-                                                    .titleLarge!
-                                                    .copyWith(
-                                                      color:
-                                                          context
-                                                              .colorScheme
-                                                              .onPrimary,
-                                                      fontFamily:
-                                                          FontFamily.w500,
-                                                    ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
+                                      Text(
+                                        data?.room?.difficulty?.capitalize() ?? "Easy",
+                                        style: TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                       ),
-                                      const SizedBox(
-                                        width: 16,
-                                      ), // Adds spacing between the Stack and the text
-                                      Expanded(
-                                        child: Text(
-                                          "You answered ${result.correctAnswere} out of ${result.answere.length} questions correctly",
-                                          maxLines: 2,
-                                          overflow:
-                                              TextOverflow
-                                                  .ellipsis, // Ensures the text doesn't overflow
-                                          textAlign:
-                                              TextAlign
-                                                  .left, // Aligns the text to the start
-                                          style: context.textTheme.bodyLarge!
-                                              .copyWith(
-                                                color:
-                                                    context
-                                                        .colorScheme
-                                                        .onPrimary,
-                                                fontFamily: FontFamily.w500,
-                                              ),
+                                      Text(
+                                        content.firstWhere(
+                                          (element) => element['id'] == data?.room?.categoryId,
+                                        )['category'],
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.4),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Icon(Icons.extension, size: 20, color: Colors.white),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 16),
+                            Expanded(
+                              child: Container(
+                                padding: EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Color(0xffFF8FA2),
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(20),
+                                    topRight: Radius.circular(20),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    SizedBox(width: 8),
+                                    SizedBox.square(
+                                      dimension: 85,
+                                      child: Stack(
+                                        children: [
+                                          Positioned.fill(
+                                            child: Animate().custom(
+                                              duration: Duration(milliseconds: 800),
+                                              begin: 0,
+                                              end:
+                                                  (data?.correct?.toDouble() ?? 0) /
+                                                  (data?.total?.toDouble() ?? 0),
+                                              curve: Curves.easeInOut,
+                                              builder:
+                                                  (context, value, child) =>
+                                                      CircularProgressIndicator(
+                                                        value: value,
+                                                        strokeWidth: 10,
+                                                        strokeCap: StrokeCap.round,
+                                                        valueColor: AlwaysStoppedAnimation(
+                                                          Colors.white,
+                                                        ),
+                                                        backgroundColor: Colors.white.withValues(
+                                                          alpha: 0.5,
+                                                        ),
+                                                      ),
+                                            ),
+                                          ),
+                                          Align(
+                                            alignment: Alignment.center,
+                                            child: Animate().custom(
+                                              duration: Duration(milliseconds: 800),
+                                              begin: 0,
+                                              end:
+                                                  (data?.correct?.toDouble() ?? 0) /
+                                                  (data?.total ?? 0),
+                                              curve: Curves.easeInOut,
+                                              builder:
+                                                  (context, value, child) => RichText(
+                                                    text: TextSpan(
+                                                      text: "${(value * 10).toInt()}",
+                                                      style: TextStyle(
+                                                        fontSize: 28,
+                                                        fontWeight: FontWeight.w600,
+                                                        color: Colors.white,
+                                                      ),
+                                                      children: [
+                                                        TextSpan(
+                                                          text: "/${data?.total ?? 0}",
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight: FontWeight.w600,
+                                                            color: Colors.white,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(width: 24),
+                                    Expanded(
+                                      child: Text(
+                                        "You answered ${data?.correct ?? 0} out of 10 questions",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24),
                     Text(
-                      "Your Answere",
-                      style: context.textTheme.bodyLarge!.copyWith(
-                        fontFamily: FontFamily.w500,
-                      ),
+                      "Your Answers",
+                      style: context.textTheme.titleLarge!.copyWith(fontFamily: FontFamily.w500),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     Container(
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
                         color: Color(0xffEFEEFC),
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 20,
-                        ),
-                        child: Wrap(
-                          runSpacing: 20,
-                          children: List.generate(
-                            result.answere.length,
-                            growable: true,
-                            (int index) {
-                              return Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
+                      child: Wrap(
+                        runSpacing: 28,
+                        children: List.generate(data!.attempts.length, (index) {
+                          final question = data.attempts[index].questionText;
+                          final attempt = data.attempts[index];
+                          return Column(
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Container(
+                                    width: 35,
+                                    height: 35,
                                     decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20),
-                                      color: context.colorScheme.onPrimary,
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
                                     ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child:
-                                          result.answere[index].isCorrect
-                                              ? Icon(
-                                                Icons.check,
-                                                color: Colors.green,
-                                              )
-                                              : result
-                                                  .answere[index]
-                                                  .isIncorrect
-                                              ? Icon(
-                                                Icons.close,
-                                                color: Colors.red,
-                                              )
-                                              : result.answere[index].isSkipped
-                                              ? Icon(
-                                                Icons.skip_next_sharp,
-                                                color: Colors.grey,
-                                              )
-                                              : null,
+                                    child: Center(
+                                      child: switch ((
+                                        attempt.correct,
+                                        attempt.incorrect,
+                                        attempt.skipped,
+                                      )) {
+                                        (1, 0, 0) => Icon(Icons.check, color: Colors.green),
+                                        (0, 1, 0) => Icon(Icons.close, color: Colors.red),
+                                        (0, 0, 1) => Icon(Icons.skip_next, color: Colors.grey),
+                                        _ => Container(),
+                                      },
                                     ),
                                   ),
-                                  const SizedBox(width: 16),
+                                  SizedBox(width: 16),
                                   Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          unescape.convert(
-                                            result.answere[index].question ??
-                                                '',
-                                          ),
-                                        ),
-                                        const SizedBox(height: 10),
-                                        Text(
-                                          unescape.convert(
-                                            result
-                                                    .answere[index]
-                                                    .correctAnswer ??
-                                                '',
-                                          ),
-                                          style: context.textTheme.bodyMedium!
-                                              .copyWith(
-                                                color: Colors.grey.shade500,
+                                    child: Builder(
+                                      builder: (context) {
+                                        final HtmlUnescape unescape = HtmlUnescape();
+                                        return Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              unescape.convert(question ?? ""),
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
                                               ),
-                                        ),
-                                      ],
+                                            ),
+                                            SizedBox(height: 4),
+                                            Text(
+                                              unescape.convert(attempt.selectedAnswer ?? ""),
+                                              style: TextStyle(color: Color(0xff858494)),
+                                            ),
+                                          ],
+                                        );
+                                      },
                                     ),
                                   ),
                                 ],
-                              );
-                            },
-                          ),
-                        ),
+                              ),
+                            ],
+                          );
+                        }),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(children: [
-                        
-                      ],
                     ),
                   ],
                 ),
-              ),
-            ),
+              );
+            },
           );
         },
       ),
-    );
-  }
-}
-
-class AnimatedCircularProgress extends StatefulWidget {
-  final double value; // from 0.0 to 1.0
-
-  const AnimatedCircularProgress({Key? key, required this.value})
-    : super(key: key);
-
-  @override
-  _AnimatedCircularProgressState createState() =>
-      _AnimatedCircularProgressState();
-}
-
-class _AnimatedCircularProgressState extends State<AnimatedCircularProgress>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  double oldValue = 0.0;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: Duration(seconds: 2),
-    );
-    _animation = Tween<double>(
-      begin: 0.0,
-      end: widget.value,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-    _controller.forward();
-  }
-
-
-  @override
-  void didUpdateWidget(covariant AnimatedCircularProgress oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.value != widget.value) {
-      _animation = Tween<double>(
-        begin: oldWidget.value,
-        end: widget.value,
-      ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-      _controller
-        ..reset()
-        ..forward();
-    }
-  }
-
-  @override
-  void dispose() {
-    
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        return CircularProgressIndicator(
-          backgroundColor: Colors.white24,
-          color: Theme.of(context).colorScheme.onPrimary,
-          strokeWidth: 12,
-          strokeCap: StrokeCap.round,
-          value: _animation.value,
-        );
-      },
     );
   }
 }

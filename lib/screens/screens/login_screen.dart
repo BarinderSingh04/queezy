@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:queezy/common/common.dart';
-import 'package:queezy/model/result.dart';
 import 'package:queezy/routes/routes.dart';
 import 'package:queezy/screens/cubit/auth_cubit.dart';
-import 'package:queezy/screens/models/auth_model.dart';
 import 'package:queezy/widgets/buttons_widget.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -39,15 +37,9 @@ class _LoginScreenState extends State<LoginScreen> {
           color: context.colorScheme.tertiary,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
-            child: BlocConsumer<AuthCubit, Result<AuthModel>>(
+            child: BlocConsumer<AuthCubit, AuthenticationState>(
               listener: (context, state) {
-                if (state.data != null) {
-                  Navigator.pushNamed(context, NavRoute.bottomNav.path);
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text("Login successfull!")));
-                }
-                if (state.error != null) {
+                if (state is AuthenticationFailure) {
                   ScaffoldMessenger.of(
                     context,
                   ).showSnackBar(SnackBar(content: Text(state.error.toString())));
@@ -152,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 24),
                           PrimaryButton(
-                            isLoading: context.watch<AuthCubit>().state.isLoading,
+                            isLoading: context.watch<AuthCubit>().state is AuthenticationLoading,
                             onPressed: () {
                               if (loginkey.currentState!.validate()) {
                                 loginkey.currentState?.save();

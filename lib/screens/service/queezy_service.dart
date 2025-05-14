@@ -9,16 +9,17 @@ import 'package:queezy/screens/models/queezy_model.dart';
 class QueezyService {
   QueezyService();
 
-  Future<GameSession> getQuizData({
+  Future<GameSession> createGame({
     String? difficulity,
     num? category,
     String? type,
     String? roomcode,
+    bool singlePlayer = false,
   }) async {
     try {
       final response = await DioSingleton.instance.dio.post(
         "create_game",
-        data: {"roomCode": roomcode},
+        data: {"roomCode": roomcode, "singlePlayer": singlePlayer},
       );
       final body = response.data;
       return GameSession.fromJson(body);
@@ -84,7 +85,19 @@ class QueezyService {
       final body = response.data;
       return JoinRoomModel.fromJson(body['data']);
     } on DioException catch (e) {
-      print("signup error: $e");
+      throw DioExceptions.fromDioError(e);
+    } on Exception {
+      rethrow;
+    }
+  }
+
+  Future<JoinRoomModel?> getActiveRoom() async {
+    try {
+      final response = await DioSingleton.instance.dio.get("active_room");
+      final body = response.data;
+      return JoinRoomModel.fromJson(body['data']);
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.badResponse) return null;
       throw DioExceptions.fromDioError(e);
     } on Exception {
       rethrow;
@@ -100,6 +113,21 @@ class QueezyService {
       return jsonResponse.map((e) => LeaderBoardModel.fromJson(e)).toList();
     } on DioException catch (e) {
       print("signup error: $e");
+      throw DioExceptions.fromDioError(e);
+    } on Exception {
+      rethrow;
+    }
+  }
+
+  Future<GameDetail> gameDetails(int? sessionId, int? playerId) async {
+    try {
+      final response = await DioSingleton.instance.dio.get(
+        "game_details/$sessionId/player/$playerId",
+      );
+      final data = response.data?["data"];
+      if (data == null) throw "No data found";
+      return GameDetail.fromJson(data);
+    } on DioException catch (e) {
       throw DioExceptions.fromDioError(e);
     } on Exception {
       rethrow;

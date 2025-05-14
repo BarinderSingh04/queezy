@@ -51,19 +51,16 @@ class QuizRoomBloc extends Bloc<QuizRoomEvent, QuizRoomState> {
   }
 
   void _joinPlayer(JoinPlayerEvent events, Emitter<QuizRoomState> emit) {
-    if (state is QuizRoomUpdateState) {
-      final state = this.state as QuizRoomUpdateState;
-      if (state.players.any((element) => element.playerId == events.player.playerId)) return;
-      final players = [...state.players, events.player];
-      emit(state.copyWith(players: players));
-    }
+    if (state.players!.any((element) => element.playerId == events.player.playerId)) return;
+    final players = [...state.players!, events.player];
+    emit(state.copyWith(players: players));
   }
 
   void _leavePlayer(LeavePlayerEvent events, Emitter<QuizRoomState> emit) {
     if (state is QuizRoomUpdateState) {
       final state = this.state as QuizRoomUpdateState;
       final players =
-          state.players.where((element) => element.playerId != events.playerId).toList();
+          state.players!.where((element) => element.playerId != events.playerId).toList();
       emit(state.copyWith(players: players));
     }
   }
@@ -74,7 +71,7 @@ class QuizRoomBloc extends Bloc<QuizRoomEvent, QuizRoomState> {
       final currentState = state as QuizRoomUpdateState;
       _socketService.emit("leave_game_room", {
         "roomCode": currentState.roomCode,
-        "playerId": currentState.currentPlayer.playerId,
+        "playerId": currentState.currentPlayer?.playerId,
       });
     }
 
@@ -84,23 +81,32 @@ class QuizRoomBloc extends Bloc<QuizRoomEvent, QuizRoomState> {
   }
 }
 
-sealed class QuizRoomState {}
+sealed class QuizRoomState {
+  final List<Player>? players;
+  final Player? currentPlayer;
+  final String? roomCode;
 
-class QuizRoomInitial extends QuizRoomState {}
+  QuizRoomState({this.players, this.currentPlayer, this.roomCode});
 
-class QuizRoomUpdateState extends QuizRoomState {
-  final List<Player> players;
-  final Player currentPlayer;
-  final String roomCode;
-  QuizRoomUpdateState({required this.players, required this.currentPlayer, required this.roomCode});
-
-  QuizRoomUpdateState copyWith({List<Player>? players, Player? currentPlayer, String? roomCode}) {
+  QuizRoomState copyWith({List<Player>? players, Player? currentPlayer, String? roomCode}) {
     return QuizRoomUpdateState(
       players: players ?? this.players,
       currentPlayer: currentPlayer ?? this.currentPlayer,
       roomCode: roomCode ?? this.roomCode,
     );
   }
+}
+
+class QuizRoomInitial extends QuizRoomState {
+  QuizRoomInitial() : super(players: [], currentPlayer: null, roomCode: null);
+}
+
+class QuizRoomUpdateState extends QuizRoomState {
+  QuizRoomUpdateState({
+    required super.players,
+    required super.currentPlayer,
+    required super.roomCode,
+  });
 }
 
 sealed class QuizRoomEvent {}

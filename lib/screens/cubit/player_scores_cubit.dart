@@ -7,12 +7,7 @@ import 'package:queezy/service/socket_service.dart';
 class PlayerScoresCubit extends Cubit<Result<List<PlayerScore>>> {
   final QueezyService _queezyService;
   final SocketService _socketService;
-  PlayerScoresCubit(this._queezyService, this._socketService) : super(Result(isLoading: true)) {
-    _socketService.on("score-updated", (data) {
-      final jsonResponse = data as List<dynamic>;
-      emit(Result(data: jsonResponse.map((e) => PlayerScore.fromJson(e)).toList()));
-    });
-  }
+  PlayerScoresCubit(this._queezyService, this._socketService) : super(Result(isLoading: true));
 
   Future<void> getScore(int? session_id) async {
     try {

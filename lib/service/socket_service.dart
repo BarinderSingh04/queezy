@@ -16,9 +16,8 @@ class SocketService {
         'token': token?.token,
       }).build(),
     );
-    _socket.on("connection", (_) {
+    _socket.onConnect((_) {
       _isConnected = true;
-      print("Connected to webSockets");
     });
     _socket.on("disconnect", (e) {
       _isConnected = false;
@@ -35,11 +34,11 @@ class SocketService {
   }
 
   void emit(String event, dynamic data) {
-    // if (_isConnected) {
+    if (_isConnected) {
     _socket.emit(event, data);
-    // } else {
-    //   print("Cannot emit, socket disconnected");
-    // }
+    } else {
+      print("Cannot emit, socket disconnected");
+    }
   }
 
   void off(String event) {

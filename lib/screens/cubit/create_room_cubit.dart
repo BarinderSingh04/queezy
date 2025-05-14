@@ -11,6 +11,7 @@ class CreateRoomCubit extends Cubit<Result<RoomModel>> {
     required int categoryId,
     required String type,
     required String difficulty,
+    bool singlePlayer = false,
   }) async {
     emit(Result.isLoading());
     try {

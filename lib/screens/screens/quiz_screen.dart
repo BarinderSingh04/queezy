@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:queezy/screens/cubit/game_session_cubit.dart';
 
 import '../../common/common.dart';
@@ -92,7 +93,12 @@ class _QuizScreenState extends State<QuizScreen> {
                 } else {
                   final sessionId = context.read<GameSessionCubit>().state.data?.sessionId;
                   if (sessionId != null) {
-                    Navigator.pushNamed(context, NavRoute.resultScreen.path, arguments: sessionId);
+                    context.go(
+                      context.namedLocation(
+                        NavRoute.resultScreen.name,
+                        pathParameters: {"sessionId": sessionId.toString()},
+                      ),
+                    );
                   }
                 }
               },
@@ -332,16 +338,13 @@ class _QuestionPageState extends State<QuestionPage> with SingleTickerProviderSt
                     bool isSelected = selected == optionText;
 
                     return InkWell(
-                      onTap:
-                          selected != null
-                              ? null
-                              : () {
-                                widget.onTap!(optionText);
-                                setState(() {
-                                  selected = optionText;
-                                });
-                                _controller.stop();
-                              },
+                      onTap: () {
+                        widget.onTap!(optionText);
+                        setState(() {
+                          selected = optionText;
+                        });
+                        _controller.stop();
+                      },
                       child: Container(
                         width: double.infinity,
                         margin: EdgeInsets.symmetric(vertical: 8),

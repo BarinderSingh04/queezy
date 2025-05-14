@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-String baseUrl = "http://192.168.1.29:3001/";
+String baseUrl = "http://localhost:3001/";
 String apiUrl = "$baseUrl/api/";
 
 abstract class FontFamily {

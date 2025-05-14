@@ -4,8 +4,9 @@ import 'package:queezy/common/common.dart';
 
 Widget buildBadgeTab() {
   return Padding(
-    padding: EdgeInsets.all(16.0),
+    padding: EdgeInsets.symmetric(horizontal: 16),
     child: GridView.count(
+      padding: EdgeInsets.zero,
       crossAxisCount: 3,
       crossAxisSpacing: 12,
       mainAxisSpacing: 12,
@@ -29,7 +30,8 @@ Widget _badgeItem(String image) {
 }
 
 class StatsWidget extends StatefulWidget {
-  StatsWidget({super.key});
+  final ScrollController? scrollController;
+  StatsWidget({super.key, this.scrollController});
 
   @override
   State<StatsWidget> createState() => _StatsWidgetState();
@@ -39,6 +41,8 @@ class _StatsWidgetState extends State<StatsWidget> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      physics: NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
           QuizPlayedWidget(),
@@ -76,11 +80,7 @@ class _StatsWidgetState extends State<StatsWidget> {
                           spacing: 10,
 
                           children: [
-                            Icon(
-                              Icons.circle,
-                              color: Color(0xffFFD6DD),
-                              size: 10,
-                            ),
+                            Icon(Icons.circle, color: Color(0xffFFD6DD), size: 10),
                             Text(
                               "Math",
                               style: context.textTheme.bodyMedium!.copyWith(
@@ -95,11 +95,7 @@ class _StatsWidgetState extends State<StatsWidget> {
                         child: Row(
                           spacing: 10,
                           children: [
-                            Icon(
-                              Icons.circle,
-                              color: Color(0xffC4D0FB),
-                              size: 10,
-                            ),
+                            Icon(Icons.circle, color: Color(0xffC4D0FB), size: 10),
                             Text(
                               "Sports",
                               style: context.textTheme.bodyMedium!.copyWith(
@@ -114,11 +110,7 @@ class _StatsWidgetState extends State<StatsWidget> {
                         child: Row(
                           spacing: 10,
                           children: [
-                            Icon(
-                              Icons.circle,
-                              color: Color(0xffA9ADF3),
-                              size: 10,
-                            ),
+                            Icon(Icons.circle, color: Color(0xffA9ADF3), size: 10),
                             Text(
                               "Music",
                               style: context.textTheme.bodyMedium!.copyWith(
@@ -150,15 +142,14 @@ class _StatsWidgetState extends State<StatsWidget> {
                             );
                           },
                         ),
-                        
+
                         titlesData: FlTitlesData(
                           leftTitles: AxisTitles(
                             sideTitles: SideTitles(
                               showTitles: true,
                               reservedSize: 28,
-                          
+
                               getTitlesWidget: (value, meta) {
-                                
                                 String text;
                                 switch (value.toInt()) {
                                   case 0:
@@ -182,20 +173,13 @@ class _StatsWidgetState extends State<StatsWidget> {
 
                                 return Text(
                                   text,
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 10,
-                                  ),
+                                  style: TextStyle(color: Colors.white, fontSize: 10),
                                 );
                               },
                             ),
                           ),
-                          rightTitles: AxisTitles(
-                            sideTitles: SideTitles(showTitles: false),
-                          ),
-                          topTitles: AxisTitles(
-                            sideTitles: SideTitles(showTitles: false),
-                          ),
+                          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
                           bottomTitles: AxisTitles(
                             sideTitles: SideTitles(
                               showTitles: true,
@@ -305,10 +289,7 @@ class QuizPlayedWidget extends StatelessWidget {
       width: MediaQuery.sizeOf(context).width,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        image: DecorationImage(
-          image: AssetImage("assets/images/stats_bg.png"),
-          fit: BoxFit.cover,
-        ),
+        image: DecorationImage(image: AssetImage("assets/images/stats_bg.png"), fit: BoxFit.cover),
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 14, vertical: 16),
@@ -325,9 +306,7 @@ class QuizPlayedWidget extends StatelessWidget {
                 textAlign: TextAlign.center,
                 text: TextSpan(
                   text: "You have played a total ",
-                  style: context.textTheme.titleLarge!.copyWith(
-                    fontFamily: FontFamily.w500,
-                  ),
+                  style: context.textTheme.titleLarge!.copyWith(fontFamily: FontFamily.w500),
                   children: [
                     TextSpan(
                       text: "24 quizzes ",
@@ -338,9 +317,7 @@ class QuizPlayedWidget extends StatelessWidget {
                     ),
                     TextSpan(
                       text: "this month",
-                      style: context.textTheme.titleLarge!.copyWith(
-                        fontFamily: FontFamily.w500,
-                      ),
+                      style: context.textTheme.titleLarge!.copyWith(fontFamily: FontFamily.w500),
                     ),
                   ],
                 ),
@@ -365,9 +342,7 @@ class QuizPlayedWidget extends StatelessWidget {
                   textAlign: TextAlign.center,
                   text: TextSpan(
                     text: "37",
-                    style: context.textTheme.headlineMedium!.copyWith(
-                      fontFamily: FontFamily.w700,
-                    ),
+                    style: context.textTheme.headlineMedium!.copyWith(fontFamily: FontFamily.w700),
                     children: [
                       TextSpan(
                         text: " /50\nquiz played",
@@ -401,8 +376,9 @@ class QuizPlayedWidget extends StatelessWidget {
                             children: [
                               Text(
                                 "5",
-                                style: context.textTheme.headlineMedium!
-                                    .copyWith(fontFamily: FontFamily.w700),
+                                style: context.textTheme.headlineMedium!.copyWith(
+                                  fontFamily: FontFamily.w700,
+                                ),
                               ),
                               Icon(Icons.edit_outlined),
                             ],
@@ -434,11 +410,10 @@ class QuizPlayedWidget extends StatelessWidget {
                             children: [
                               Text(
                                 "21",
-                                style: context.textTheme.headlineMedium!
-                                    .copyWith(
-                                      fontFamily: FontFamily.w700,
-                                      color: context.colorScheme.onPrimary,
-                                    ),
+                                style: context.textTheme.headlineMedium!.copyWith(
+                                  fontFamily: FontFamily.w700,
+                                  color: context.colorScheme.onPrimary,
+                                ),
                               ),
                               Image.asset("assets/images/won_match_icon.png"),
                             ],
@@ -484,10 +459,7 @@ class _TimeSpanDropDownState extends State<TimeSpanDropDown> {
         child: DropdownButton<String>(
           value: selectedValue,
           hint: Text(items[0]),
-          icon: Icon(
-            Icons.arrow_drop_down,
-            color: context.colorScheme.secondary,
-          ),
+          icon: Icon(Icons.arrow_drop_down, color: context.colorScheme.secondary),
           elevation: 16,
           style: TextStyle(color: Colors.deepPurple),
           underline: SizedBox(),
@@ -498,10 +470,7 @@ class _TimeSpanDropDownState extends State<TimeSpanDropDown> {
           },
           items:
               items.map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
+                return DropdownMenuItem<String>(value: value, child: Text(value));
               }).toList(),
         ),
       ),

@@ -22,6 +22,7 @@ class _LeaderBoardScreenState extends State<LeaderBoardScreen> {
       child: Builder(
         builder: (context) {
           return Scaffold(
+            backgroundColor: context.colorScheme.secondary,
             appBar: AppBar(
               title: Text(
                 "Leaderboard",

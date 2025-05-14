@@ -51,15 +51,47 @@ class AuthService {
       final auth = AuthModel.fromJson(content);
       _tokenService.setToken(TokenModel.fromMap(content));
       await _localStorageService.saveUser(auth.data!);
-      return AuthModel.fromJson(body["data"]);
+      return auth;
     } on DioException catch (e) {
-      print("login error: $e");
       throw DioExceptions.fromDioError(e);
     }
+  }
+
+  Future<User> user() async {
+    try {
+      final response = await DioSingleton.instance.dio.get('me');
+      final body = response.data;
+      return User.fromJson(body["data"]);
+    } on DioException catch (e) {
+      throw DioExceptions.fromDioError(e);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  User? localUser() {
+    return _localStorageService.getUser();
   }
 
   void logoutUser() {
     _localStorageService.clearSession();
     _tokenService.clearToken();
+  }
+
+  Future<User> updateProfile({String? name, String? email, String? avatar}) async {
+    try {
+      final response = await DioSingleton.instance.dio.post(
+        'update_profile',
+        data: {"name": name, "email": email, "avatar": avatar},
+      );
+      final body = response.data;
+      final user = User.fromJson(body["data"]);
+      await _localStorageService.saveUser(user);
+      return user;
+    } on DioException catch (e) {
+      throw DioExceptions.fromDioError(e);
+    } catch (e) {
+      rethrow;
+    }
   }
 }

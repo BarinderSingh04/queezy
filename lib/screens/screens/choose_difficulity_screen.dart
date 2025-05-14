@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:queezy/common/common.dart';
 import 'package:queezy/model/result.dart';
 import 'package:queezy/routes/routes.dart';
@@ -32,6 +33,7 @@ class _ChooseDifficulityScreenState extends State<ChooseDifficulityScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: context.colorScheme.secondary,
       appBar: AppBar(
         title: Text("Choose Difficulty", style: TextStyle(color: Colors.white)),
         centerTitle: true,
@@ -48,11 +50,7 @@ class _ChooseDifficulityScreenState extends State<ChooseDifficulityScreen> {
             child: BlocConsumer<CreateRoomCubit, Result<RoomModel>>(
               listener: (context, state) {
                 if (state.data != null) {
-                  Navigator.pushReplacementNamed(
-                    context,
-                    NavRoute.quizDetails.path,
-                    arguments: state.data,
-                  );
+                  context.goNamed(NavRoute.quizDetails.name, extra: state.data);
                 }
                 if (state.error != null) {
                   ScaffoldMessenger.of(

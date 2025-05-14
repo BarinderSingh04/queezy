@@ -1,10 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:queezy/routes/routes.dart';
-
-import '../../di/service_locator.dart';
-import '../../service/token_service.dart';
+import 'package:queezy/screens/cubit/auth_cubit.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -16,26 +14,25 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
-    super.initState();
-    Timer(const Duration(seconds: 3), () async {
-      final token = await getIt<TokenService>().getToken();
+    Future.delayed(const Duration(seconds: 2), () {
+      final authState = context.read<AuthCubit>().state;
+      final isLoggedIn = authState is AuthenticatedState;
 
-      if (token != null && token.token != null) {
-        Navigator.pushNamed(context, NavRoute.bottomNav.path);
+      if (isLoggedIn) {
+        context.go(NavRoute.home.path);
       } else {
-        Navigator.pushNamed(context, NavRoute.onBoarding.path);
+        context.go(NavRoute.onBoarding.path);
       }
     });
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Container(
-          decoration: BoxDecoration(color: Color(0xff6A5AE0)),
-          child: Center(child: Image.asset("assets/images/logo.png")),
-        ),
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(color: Color(0xff6A5AE0)),
+        child: Center(child: Image.asset("assets/images/logo.png")),
       ),
     );
   }

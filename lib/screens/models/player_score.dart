@@ -1,13 +1,14 @@
+import '../../common/common.dart';
+
 class PlayerScore {
   int? playerId;
   String? name;
   String? avatar;
   int? total;
-  String? correct;
-  String? incorrect;
-  String? skipped;
+  num? correct;
+  num? incorrect;
+  num? skipped;
   num? accuracy;
-  List<Attemps>? attemps;
 
   PlayerScore({
     this.playerId,
@@ -17,24 +18,19 @@ class PlayerScore {
     this.correct,
     this.incorrect,
     this.skipped,
-    this.attemps,
   });
+
+  String get path => "$baseUrl$avatar";
 
   PlayerScore.fromJson(Map<String, dynamic> json) {
     playerId = json['playerId'];
     name = json['name'];
     avatar = json['avatar'];
     total = json['total'];
-    correct = json['correct'];
-    incorrect = json['incorrect'];
-    skipped = json['skipped'];
+    correct = num.tryParse(json['correct']);
+    incorrect = num.tryParse(json['incorrect']);
+    skipped = num.tryParse(json['skipped']);
     accuracy = json["accuracy"];
-    if (json['attemps'] != null) {
-      attemps = <Attemps>[];
-      json['attemps'].forEach((v) {
-        attemps!.add(new Attemps.fromJson(v));
-      });
-    }
   }
 }
 
@@ -42,6 +38,9 @@ class Attemps {
   int? playerId;
   String? questionText;
   String? selectedAnswer;
+  String? correctAnswer;
+  String? difficulty;
+  int? categoryId;
   int? correct;
   int? skipped;
   int? incorrect;
@@ -59,6 +58,9 @@ class Attemps {
     playerId = json['playerId'];
     questionText = json['questionText'];
     selectedAnswer = json['selectedAnswer'];
+    categoryId = json['categoryId'];
+    difficulty = json['difficulty'];
+    correctAnswer = json['correctAnswer'];
     correct = json['correct'];
     skipped = json['skipped'];
     incorrect = json['incorrect'];

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:queezy/common/common.dart';
 
 import '../../routes/routes.dart';
@@ -21,9 +22,7 @@ class _SignupScreenState extends State<SignupScreen> {
         backgroundColor: context.colorScheme.tertiary,
         title: Text(
           "Sign Up",
-          style: context.textTheme.headlineMedium!.copyWith(
-            fontFamily: FontFamily.w500,
-          ),
+          style: context.textTheme.headlineMedium!.copyWith(fontFamily: FontFamily.w500),
         ),
         centerTitle: true,
       ),
@@ -41,7 +40,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 children: [
                   PrimaryIconButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, NavRoute.signupPage.path);
+                      context.push(NavRoute.signupPage.path);
                     },
                     label: 'Sign Up with Email',
                     icon: Icon(Icons.email_outlined),
@@ -62,10 +61,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          Navigator.pushReplacementNamed(
-                            context,
-                            NavRoute.login.path,
-                          );
+                          Navigator.pushReplacementNamed(context, NavRoute.login.path);
                         },
                         child: Text(
                           "Login",
@@ -83,9 +79,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     textAlign: TextAlign.center,
                     text: TextSpan(
                       text: "By continuing, you agree to the ",
-                      style: context.textTheme.bodyMedium!.copyWith(
-                        color: Colors.grey,
-                      ),
+                      style: context.textTheme.bodyMedium!.copyWith(color: Colors.grey),
                       children: [
                         TextSpan(
                           text: 'Terms of Services',
@@ -95,9 +89,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                         TextSpan(
                           text: ' & ',
-                          style: context.textTheme.bodyMedium!.copyWith(
-                            color: Colors.grey,
-                          ),
+                          style: context.textTheme.bodyMedium!.copyWith(color: Colors.grey),
                         ),
                         TextSpan(
                           text: 'Privacy Policy.',

@@ -1,4 +1,5 @@
 import 'package:queezy/common/common.dart';
+import 'package:queezy/screens/models/player_score.dart';
 
 class RoomModel {
   String? code;
@@ -17,7 +18,7 @@ class RoomModel {
 
   RoomModel.fromJson(Map<String, dynamic> json) {
     code = json['roomCode'];
-    player = Player.fromJson(json['player']);
+    player = json['player'] != null ? Player.fromJson(json['player']) : null;
     type = json['type'];
     categoryId = json['categoryId'];
     difficulty = json['difficulty'];
@@ -120,6 +121,35 @@ class LeaderBoardModel extends Player {
       avatar: json['avatar'],
       gamesPlayed: json['gamesPlayed'],
       totalScore: num.tryParse(json['totalScore']),
+    );
+  }
+}
+
+class GameDetail {
+  final num? correct;
+  final num? incorrect;
+  final num? skipped;
+  final num? total;
+  final RoomModel? room;
+  final List<Attemps> attempts;
+
+  GameDetail({
+    required this.room,
+    required this.attempts,
+    this.correct,
+    this.incorrect,
+    this.skipped,
+    this.total,
+  });
+
+  factory GameDetail.fromJson(Map<String, dynamic> json) {
+    return GameDetail(
+      correct: json['correct'],
+      incorrect: json['incorrect'],
+      skipped: json['skipped'],
+      total: json['total'],
+      room: json['room'] != null ? RoomModel.fromJson(json['room']) : null,
+      attempts: List<Attemps>.from(json['attempts'].map((x) => Attemps.fromJson(x))),
     );
   }
 }

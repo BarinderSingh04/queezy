@@ -11,17 +11,23 @@ class GameSessionCubit extends Cubit<Result<GameSession>> {
   final LocalStorageService _localStorageService;
 
   GameSessionCubit(this._queezyService, this._socketService, this._localStorageService)
-    : super(Result(isLoading: true)) {
+    : super(Result(isLoading: false)) {
     _socketService.on("game-started", (data) {
       final gameSession = GameSession.fromJson(data);
       emit(Result(data: gameSession));
     });
+    _socketService.on("game_ended", (data) {
+      print(data);
+    });
   }
 
-  Future<void> create({String? roomcode}) async {
+  Future<void> create({String? roomcode, bool singlePlayer = false}) async {
     try {
       emit(Result(isLoading: true));
-      final response = await _queezyService.getQuizData(roomcode: roomcode);
+      final response = await _queezyService.createGame(
+        roomcode: roomcode,
+        singlePlayer: singlePlayer,
+      );
       emit(Result(data: response));
     } catch (e) {
       emit(Result(error: e.toString()));
@@ -53,6 +59,7 @@ class GameSessionCubit extends Cubit<Result<GameSession>> {
   @override
   Future<void> close() {
     _socketService.off("game-started");
+    _socketService.off("game-ended");
     return super.close();
   }
 }
